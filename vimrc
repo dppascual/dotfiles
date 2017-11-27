@@ -98,11 +98,11 @@ colorscheme molokai
 "{{{ Spaces & Tabs
 " Indentation options by default
 set autoindent			" Copy the indentation from current line when starting a new line
-set noexpandtab			" When enabled, causes spaces to be used in place of tab characters
-set tabstop=8                   " Specifies the width of a tab character
-set softtabstop=0               " When enabled, fine tunes the amount of whitespace to be inserted
-set shiftwidth=8  	        " Determines the amount of whitespace to insert or remove using indentatioin when you press >>, << or ==
-				" It also affects how automatic indentation works with smarttab
+set expandtab			" When enabled, causes spaces to be used in place of tab characters
+set tabstop=4           " Specifies the width of a tab character
+set softtabstop=4       " When enabled, fine tunes the amount of whitespace to be inserted
+set shiftwidth=4  	    " Determines the amount of whitespace to insert or remove using indentatioin when you press >>, << or ==
+                        " It also affects how automatic indentation works with smarttab
 "}}}
 
 "{{{ Searching
@@ -184,19 +184,18 @@ let g:AutoPairs={'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`'}
 "}}}
 
 "{{{ CtrlP
-let g:ctrlp_match_window='bottom,order:ttb'
-let g:ctrlp_switch_buffer=0
-let g:ctrlp_working_path_mode=0
-let g:ctrlp_user_command = 'find %s -type f'
-"let g:ctrlp_user_command = 'ag %s -i --nocolor --nogroup --hidden
-"      \ --ignore .git
-"      \ --ignore .svn
-"      \ --ignore .hg
-"      \ --ignore .DS_Store
-"      \ -g ""'
-let g:ctrlp_max_files=0
+let g:ctrlp_cmd = 'CtrlPMRU'
+let g:ctrlp_working_path_mode = 'ra'
+let g:ctrlp_switch_buffer = 'et'  " jump to a file if it's open already
+let g:ctrlp_mruf_max=450    " number of recently opened files
+let g:ctrlp_max_files=0     " do not limit the number of searchable files
+let g:ctrlp_use_caching = 1
+let g:ctrlp_clear_cache_on_exit = 0
+let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
+let g:ctrlp_match_window = 'bottom,order:btt,max:10,results:10'
+let g:ctrlp_buftag_types = {'go' : '--language-force=go --golang-types=ftv'}
 
-nnoremap <silent> <leader>b :CtrlPBuffer<CR>
+nnoremap <silent> <leader>b :CtrlPCurWD<CR>
 "}}}
 
 "{{{ YouComplete
@@ -325,6 +324,12 @@ augroup RubyFiles
     autocmd FileType ruby setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
     autocmd FileType ruby IndentLinesEnable
 augroup END
+
+augroup CFiles
+    autocmd!
+    autocmd BufNewFile,BufRead *.c,*.h setlocal noexpandtab tabstop=2 softtabstop=2 shiftwidth=2
+augroup END
+
 
 augroup JsonFiles
     autocmd!
