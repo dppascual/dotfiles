@@ -69,7 +69,7 @@ Plug 'godlygeek/tabular'
 Plug 'SirVer/ultisnips'
 Plug 'Yggdroot/indentLine'
 Plug 'tpope/vim-fugitive'
-" Languages 
+" Languages
 Plug 'elzr/vim-json', {'for' : 'json'}
 Plug 'fatih/vim-go'
 Plug 'vim-ruby/vim-ruby'
@@ -127,10 +127,9 @@ nnoremap <C-c> :call multiple_cursors#quit()<CR>
 "}}}
 
 "{{{ IndentLine
-let g:indentLine_enabled = 1
+let g:indentLine_enabled = 0
 let g:indentLine_color_term = 239
 let g:indentLine_char = '¦'
-let g:indentLine_setConceal = 0
 "set conceallevel=0
 "}}}
 
@@ -303,6 +302,7 @@ augroup END
 augroup PythonFiles
     autocmd!
     autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 expandtab foldmethod=indent foldlevel=99
+    autocmd FileType python IndentLinesEnable
     autocmd FileType python nnoremap <C-]> :YcmCompleter GoToDeclaration<CR>
     autocmd FileType python nnoremap <leader>gd :YcmCompleter GoToDefinition<CR>
 augroup END
@@ -323,6 +323,12 @@ augroup END
 augroup RubyFiles
     autocmd!
     autocmd FileType ruby setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
+    autocmd FileType ruby IndentLinesEnable
+augroup END
+
+augroup JsonFiles
+    autocmd!
+    autocmd FileType json setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
 augroup END
 
 augroup MakeFiles
