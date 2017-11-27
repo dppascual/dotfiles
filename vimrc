@@ -5,24 +5,22 @@
 "                                                                            "
 " Sections:                                                                  "
 "   * General                                                                "
-"   * Vundle                                                                 "
+"   * Vim-plug                                                               "
 "   * UI Layout                                                              "
 "   * Theme & Colors                                                         "
 "   * Spaces & Tabs                                                          "
 "   * Searching                                                              "
 "   * Misc                                                                   "
 "   * Vim-multiple-cursors                                                   "
-"   * Vim-minimap                                                            "
 "   * IndentLine                                                             "
 "   * UltiSnips                                                              "
 "   * Airline                                                                "
 "   * Auto-pairs                                                             "
 "   * CtrlP                                                                  "
 "   * YouComplete                                                            "
-"   * Syntastic                                                              "
 "   * Neomake                                                                "
-"   * Vim-scala                                                              "
 "   * Vim-go                                                                 "
+"   * Vim-json                                                               "
 "   * Tagbar                                                                 "
 "   * Mapping keys                                                           "
 "   * AutoGroups                                                             "
@@ -41,43 +39,42 @@
 
 "{{{ General
 set nocompatible         " get rid of Vi compatibility mode. SET FIRST!
-set hidden				 " it hides buffers instead of closing them. It allows
-" to switch between buffers without saving changes
+set hidden				 " it hides buffers instead of closing them. It allows to switch between buffers without saving changes
 set encoding=utf-8
 filetype off
 set mouse=""
 "}}}
 
-"{{{ Vundle
-" set the runtime path to include Vundle and initialize
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
+"{{{ Vim-plug
+call plug#begin('~/.vim/plugged')
 
-Plugin 'altercation/vim-colors-solarized'
-Plugin 'tomasr/molokai'
-Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
-Plugin 'bling/vim-bufferline'
-Plugin 'severin-lemaignan/vim-minimap'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'majutsushi/tagbar'
-Plugin 'scrooloose/nerdtree'
-Plugin 'Valloric/YouCompleteMe'
-"Plugin 'scrooloose/syntastic'
-Plugin 'neomake/neomake'
-Plugin 'terryma/vim-multiple-cursors'
-Plugin 'tpope/vim-surround'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'godlygeek/tabular'
-Plugin 'SirVer/ultisnips'
-Plugin 'Yggdroot/indentLine'
-Plugin 'fatih/vim-go'
-Plugin 'vim-ruby/vim-ruby'
-"Plugin 'derekwyatt/vim-scala'
-"Plugin 'ensime/ensime-vim'
+" Appareance
+Plug 'altercation/vim-colors-solarized'
+Plug 'tomasr/molokai'
+Plug 'vim-airline/vim-airline'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'bling/vim-bufferline'
+" IDE options
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'majutsushi/tagbar'
+Plug 'scrooloose/nerdtree'
+Plug 'Valloric/YouCompleteMe'
+" Error Handling
+Plug 'neomake/neomake'
+" Miscellaneous functionalities
+Plug 'terryma/vim-multiple-cursors'
+Plug 'tpope/vim-surround'
+Plug 'jiangmiao/auto-pairs'
+Plug 'godlygeek/tabular'
+Plug 'SirVer/ultisnips'
+Plug 'Yggdroot/indentLine'
+Plug 'tpope/vim-fugitive'
+" Languages 
+Plug 'elzr/vim-json', {'for' : 'json'}
+Plug 'fatih/vim-go'
+Plug 'vim-ruby/vim-ruby'
 
-" All of your Plugins must be added before the following line
-call vundle#end()
+call plug#end()
 "}}}
 
 "{{{ UI Layout
@@ -99,13 +96,13 @@ colorscheme molokai
 "}}}
 
 "{{{ Spaces & Tabs
-" Indentation options
-set autoindent						" copy the indentation from current line when starting a new line
-set expandtab						" use spaces for indentation
-set softtabstop=4
-set tabstop=4                       " uses spaces, not tabs (width = 4) for indentation
-set shiftwidth=4  				    " indentation used (width = 4) when you press >>, << or ==
-                                    " It also affects how automatic indentation works with smarttab
+" Indentation options by default
+set autoindent			" Copy the indentation from current line when starting a new line
+set noexpandtab			" When enabled, causes spaces to be used in place of tab characters
+set tabstop=8                   " Specifies the width of a tab character
+set softtabstop=0               " When enabled, fine tunes the amount of whitespace to be inserted
+set shiftwidth=8  	        " Determines the amount of whitespace to insert or remove using indentatioin when you press >>, << or ==
+				" It also affects how automatic indentation works with smarttab
 "}}}
 
 "{{{ Searching
@@ -129,22 +126,50 @@ let g:multi_cursor_quit_key='<C-c>'
 nnoremap <C-c> :call multiple_cursors#quit()<CR>
 "}}}
 
-"{{{ Vim-minimap
-let g:minimap_show='<leader>ms'
-let g:minimap_update='<leader>mu'
-let g:minimap_close='<leader>mc'
-let g:minimap_toggle='<leader>mt'
-"}}}
-
 "{{{ IndentLine
 let g:indentLine_enabled = 1
 let g:indentLine_color_term = 239
 let g:indentLine_char = '¦'
-"set conceallevel=1
-"let g:indentLine_conceallevel=1
+let g:indentLine_setConceal = 0
+"set conceallevel=0
 "}}}
 
 "{{{ UltiSnips
+function! g:UltiSnips_Complete()
+  call UltiSnips#ExpandSnippet()
+  if g:ulti_expand_res == 0
+    if pumvisible()
+      return "\<C-n>"
+    else
+      call UltiSnips#JumpForwards()
+      if g:ulti_jump_forwards_res == 0
+        return "\<TAB>"
+      endif
+    endif
+  endif
+  return ""
+endfunction
+
+function! g:UltiSnips_Reverse()
+  call UltiSnips#JumpBackwards()
+  if g:ulti_jump_backwards_res == 0
+    return "\<C-P>"
+  endif
+
+  return ""
+endfunction
+
+
+if !exists("g:UltiSnipsJumpForwardTrigger")
+  let g:UltiSnipsJumpForwardTrigger = "<tab>"
+endif
+
+if !exists("g:UltiSnipsJumpBackwardTrigger")
+  let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+endif
+
+au InsertEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+au InsertEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " <C-R>=g:UltiSnips_Reverse()<cr>"
 "}}}
 
 "{{{ Airline
@@ -178,39 +203,6 @@ nnoremap <silent> <leader>b :CtrlPBuffer<CR>
 "{{{ YouComplete
 let g:ycm_global_ycm_extra_conf = "~/.ycm_extra_conf.py"
 let g:ycm_python_binary_path = 'python'
-"}}}
-
-"{{{ Syntastic
-"set statusline+=%#warningmsg#                      "Not necessary with airline plugin
-"set statusline+=%{SyntasticStatuslineFlag()}       "Not necessary with airline plugin
-"set statusline+=%*                                 "Not necessary with airline plugin
-"""let g:syntastic_stl_format = "[%E{Errors: %fe #%e}%B{, }%W{Warnings: %fw #%w}]"    "control what the syntastic statusline text contains. (Default: '[Syntax: line:%F (%t)]')
-"""
-"""let g:syntastic_always_populate_loc_list = 1    "By default syntastic doesn't fill the |location-list| with the errors found by the checkers. Enable this option to tell syntastic to always stick any detected errors into the |location-list|. (Default: 0)
-"""let g:syntastic_auto_loc_list = 1       "Automatically open the |location-list| when errors are detected, and close when none are detected. syntastic fill the |location-list| with the errors found by the checkers. By default, doesn't. (Default: 2)
-"""let g:syntastic_loc_list_height = 5     "Specify the height of the location lists that syntastic opens. (Default: 10)
-"""let g:syntastic_check_on_open = 0       "In active mode will run syntax checks when buffers are first loaded. (Default: 0 - disable)
-"""let g:syntastic_check_on_wq = 0         "In active mode syntax checks are run whenever buffers are written to disk. (Default: 1 - enable)
-"""let g:syntastic_aggregate_errors = 1    "If |'syntastic_aggregate_errors'| is unset (which is the default), checking stops the first time a checker reports any errors; if |'syntastic_aggregate_errors'| is set, all checkers that apply are run in turn, and all errors found are aggregated in a single list. (Default: 0 - disable)
-"""let g:syntastic_id_checkers = 1             "Label error messages with the names of the checkers that created them. (Default: 1 - enable)
-"""let g:syntastic_sort_aggregated_errors = 1  "Errors are grouped by file, then sorted by line number, then grouped by type (namely errors take precedence over warnings), then they are sorted by column number, when results from multiple checkers are aggregated in a single error list. (Default: 1 - enable)
-"""let g:syntastic_echo_current_error = 1  "Echo current error to the command window. (Default: 1 - enable)
-"""let g:syntastic_cursor_column = 0       "This option controls which errors are echoed to the command window if |'syntastic_echo_current_error'| is set and multiple errors are found on the same line. When the option is enabled, the first error corresponding to the current column is shown. Otherwise, the first error on the current line is echoed, regardless of the cursor position on the current line. (Default: 1 - enable)
-"""
-"""let g:syntastic_error_symbol = "\u2718"
-"""let g:syntastic_warning_symbol = "\u2718"
-"""let g:syntastic_style_error_symbol = "S>"
-"""let g:syntastic_style_warning_symbol = "S>"
-"""highlight SyntasticErrorSign term=reverse ctermbg=52 gui=undercurl guisp=#FF0000
-"""highlight SyntasticWarningSign term=reverse ctermfg=0 ctermbg=222 guifg=#000000 guibg=#FFE792
-"""highlight link SyntasticStyleErrorSign SyntasticErrorSign
-"""highlight link SyntasticStyleWarningSign SyntasticWarningSign
-"""
-"""let g:syntastic_go_checkers = ['go', 'gofmt', 'golint', 'govet']
-"""let g:syntastic_scala_checkers = ['fsc', 'scalac']
-"""let g:syntastic_mode_map = { "mode": 'active',
-"""            \ "active_filetypes": [],
-"""            \ "passive_filetypes": ['go','scala']  }
 "}}}
 
 "{{{ Neomake
@@ -252,8 +244,8 @@ let g:go_highlight_build_constraints = 1
 "let g:go_list_type = "quickfix"
 "}}}
 
-"{{{ Vim-scala
-"let g:scala_scaladoc_indent = 1 "Enable the indentation standard as recommended for Scaladoc comments, else the plugin indents documentation comments according to the standard Javadoc format.
+"{{{ Vim-json
+"let g:vim_json_syntax_conceal = 0
 "}}}
 
 "{{{ Tagbar
@@ -296,15 +288,6 @@ augroup GeneralFiles
     autocmd FileType * :setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
 
-"augroup Syntastic
-"    autocmd!
-"    autocmd FileType scala,go nnoremap <silent> <leader>lo :lopen<CR>
-"    autocmd FileType scala,go nnoremap <silent> <leader>lc :lclose<CR>
-"    autocmd FileType scala,go nnoremap <silent> <leader>ln :lnext<CR>
-"    autocmd FileType scala,go nnoremap <silent> <leader>lp :lprev<CR>
-"    autocmd FileType scala,go nnoremap <silent> <leader>sc :SyntasticCheck<CR>
-"augroup END
-
 augroup Neomake
     autocmd!
     autocmd BufWritePost *.scala Neomake
@@ -319,16 +302,14 @@ augroup END
 
 augroup PythonFiles
     autocmd!
-    autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 textwidth=79 expandtab foldmethod=indent foldlevel=99
-    autocmd FileType python setlocal list listchars=tab:\¦\ 
-    "autocmd FileType python let g:indentLine_enabled=1
+    autocmd FileType python setlocal tabstop=4 softtabstop=4 shiftwidth=4 expandtab foldmethod=indent foldlevel=99
     autocmd FileType python nnoremap <C-]> :YcmCompleter GoToDeclaration<CR>
     autocmd FileType python nnoremap <leader>gd :YcmCompleter GoToDefinition<CR>
 augroup END
 
 augroup GoFiles
     autocmd!
-    autocmd FileType go setlocal noexpandtab softtabstop=8 tabstop=8 shiftwidth=8 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
+    autocmd FileType go setlocal noexpandtab tabstop=8 softtabstop=8 shiftwidth=8 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
     autocmd FileType go setlocal list listchars=tab:\¦\ 
     autocmd FileType go nnoremap <silent> <leader>gr <Plug>(go-run)
     autocmd FileType go nnoremap <silent> <leader>gb <Plug>(go-build)
@@ -341,19 +322,12 @@ augroup END
 
 augroup RubyFiles
     autocmd!
-    autocmd FileType ruby setlocal expandtab softtabstop=2 tabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
-augroup END
-
-augroup ScalaFiles
-    autocmd!
-    autocmd FileType scala setlocal foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
-    autocmd FileType scala let g:indentLine_enabled=1
-    autocmd FileType scala let g:ycm_auto_trigger = 1
+    autocmd FileType ruby setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
 augroup END
 
 augroup MakeFiles
     autocmd!
-    autocmd FileType make setlocal noexpandtab softtabstop=8 tabstop=8 shiftwidth=8
+    autocmd FileType make setlocal noexpandtab tabstop=4 softtabstop=4  shiftwidth=4
 augroup END
 "}}}
 
