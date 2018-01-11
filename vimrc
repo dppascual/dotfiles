@@ -41,7 +41,7 @@ call plug#begin('~/.vim/plugged')
 " Appareance
 Plug 'altercation/vim-colors-solarized'
 Plug 'tomasr/molokai'
-Plug 'liuchengxu/space-vim-dark'
+Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'bling/vim-bufferline'
@@ -83,7 +83,7 @@ set wildmenu
 syntax on
 set t_Co=256
 set background=dark
-colorscheme space-vim-dark
+colorscheme gruvbox
 "}}}
 
 "{{{ Spaces & Tabs
@@ -164,7 +164,7 @@ au InsertEnter * exec "inoremap <silent> " . g:UltiSnipsJumpBackwardTrigger . " 
 
 "{{{ Airline
 let g:bufferline_echo=0
-let g:airline_theme='violet'
+let g:airline_theme='gruvbox'
 let g:airline_powerline_fonts=1
 let g:Powerline_symbols='fancy'
 let g:airline#extensions#tabline#enabled=1
