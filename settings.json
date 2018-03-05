@@ -1,0 +1,8 @@
+{
+    "workbench.colorTheme": "Gruvbox Dark (Medium)",
+    "editor.lineNumbers": "relative",
+    "workbench.sideBar.location": "left",
+    "workbench.statusBar.visible": true,
+    "zenMode.hideStatusBar": false,
+    "editor.multiCursorModifier": "alt"
+}
