@@ -17,7 +17,7 @@
 "   * Airline                                                                "
 "   * Auto-pairs                                                             "
 "   * CtrlP                                                                  "
-"   * YouComplete                                                            "
+"   * Deoplete
 "   * Neomake                                                                "
 "   * Vim-go                                                                 "
 "   * Vim-json                                                               "
@@ -49,7 +49,8 @@ Plug 'bling/vim-bufferline'
 Plug 'ctrlpvim/ctrlp.vim'
 Plug 'majutsushi/tagbar'
 Plug 'scrooloose/nerdtree'
-Plug 'Valloric/YouCompleteMe'
+Plug 'Shougo/deoplete.nvim'
+Plug 'zchee/deoplete-go', { 'do': 'make'}
 " Error Handling
 Plug 'neomake/neomake'
 " Miscellaneous functionalities
@@ -183,13 +184,22 @@ let g:ctrlp_buftag_types = {'go' : '--language-force=go --golang-types=ftv'}
 nnoremap <silent> <leader>b :CtrlPCurWD<CR>
 "}}}
 
-"{{{ YouComplete
-let g:ycm_global_ycm_extra_conf = "~/.ycm_extra_conf.py"
-let g:ycm_python_binary_path = 'python'
+"{{{ Deoplete
+"let g:ycm_global_ycm_extra_conf = "~/.ycm_extra_conf.py"
+"let g:ycm_python_binary_path = 'python'
 " make YCM compatible with UltiSnips (using supertab)
-let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-let g:SuperTabDefaultCompletionType = '<C-n>'
+"let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
+"let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
+"let g:SuperTabDefaultCompletionType = '<C-n>'
+set completeopt-=longest,menuone,preview " auto complete setting
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_smart_case = 1
+let g:deoplete#auto_complete_start_length = 1
+let g:deoplete#keyword_patterns = {}
+let g:deoplete#keyword_patterns['default'] = '\h\w*'
+let g:deoplete#omni#input_patterns = {}
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+let g:deoplete#sources#go#align_class = 1
 "}}}
 
 "{{{ Neomake
@@ -197,7 +207,30 @@ let g:SuperTabDefaultCompletionType = '<C-n>'
 "let g:neomake_logfile='/tmp/error.log'
 
 let g:neomake_open_list = 2
-"let g:neomake_scala_enabled_makers = ['scalastyle']
+let g:neomake_go_enabled_makers = ['scalastyle']
+let g:neomake_go_enabled_makers = [ 'go', 'gometalinter' ]
+let g:neomake_go_gometalinter_maker = {
+  \ 'args': [
+  \   '--tests',
+  \   '--enable-gc',
+  \   '--concurrency=3',
+  \   '--fast',
+  \   '-D', 'aligncheck',
+  \   '-D', 'dupl',
+  \   '-D', 'gocyclo',
+  \   '-D', 'gotype',
+  \   '-E', 'errcheck',
+  \   '-E', 'misspell',
+  \   '-E', 'unused',
+  \   '%:p:h',
+  \ ],
+  \ 'append_file': 0,
+  \ 'errorformat':
+  \   '%E%f:%l:%c:%trror: %m,' .
+  \   '%W%f:%l:%c:%tarning: %m,' .
+  \   '%E%f:%l::%trror: %m,' .
+  \   '%W%f:%l::%tarning: %m'
+  \ }
 
 let g:neomake_error_sign = {
     \ 'text': '✘',
@@ -277,9 +310,9 @@ augroup END
 
 augroup Neomake
     autocmd!
-    autocmd BufWritePost *.scala Neomake
-    autocmd FileType scala nnoremap <silent> <leader>lo :lopen<CR>
-    autocmd FileType scala nnoremap <silent> <leader>lc :lclose<CR>
+    autocmd BufWritePost *.go Neomake
+    autocmd FileType go nnoremap <silent> <leader>lo :lopen<CR>
+    autocmd FileType go nnoremap <silent> <leader>lc :lclose<CR>
 augroup END
 
 augroup Vim
