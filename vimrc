@@ -4,56 +4,90 @@
 "                                                                            "
 "                                                                            "
 " Sections:                                                                  "
+"                                                                            "
+"   * User-declared variables and functions                                  "
 "   * General                                                                "
 "   * Vim-plug                                                               "
-"   * UI Layout                                                              "
-"   * Theme & Colors                                                         "
-"   * Spaces & Tabs                                                          "
-"   * Searching                                                              "
-"   * Misc                                                                   "
-"   * Vim-multiple-cursors                                                   "
-"   * IndentLine                                                             "
-"   * UltiSnips                                                              "
-"   * Airline                                                                "
-"   * Auto-pairs                                                             "
-"   * CtrlP                                                                  "
-"   * Deoplete
-"   * Neomake                                                                "
-"   * Vim-go                                                                 "
-"   * Vim-json                                                               "
-"   * Tagbar                                                                 "
+"   * Appareance                                                             "
+"       * UI Layout                                                          "
+"       * Theme & Colors                                                     "
+"       * Airline                                                            "
+"       * Vim-devicons                                                       "
+"   * IDE options                                                            "
+"       * Denite                                                             "
+"       * Spaces & Tabs                                                      "
+"       * Searching                                                          "
+"       * Deoplete                                                           "
+"       * Vim-multiple-cursors                                               "
+"       * IndentLine                                                         "
+"       * UltiSnips                                                          "
+"       * Auto-pairs                                                         "
+"       * NERDTree                                                           "
+"       * Tagbar                                                             "
+"       * Folding                                                            "
+"   * Error Handling                                                         "
+"       * Neomake                                                            "
+"   * Languages                                                              "
+"      * Vim-go                                                              "
+"      * Vim-json                                                            "
 "   * Mapping keys                                                           "
 "   * AutoGroups                                                             "
-"   * Functions                                                              "
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+"{{{ User-declared variables and functions
+
+" Set KernosVim buffer index type, default is 0.
+" >
+"   " types:
+"   " 0: 1 ➛ ➊
+"   " 1: 1 ➛ ➀
+"   " 2: 1 ➛ ⓵
+"   " 3: 1 ➛ ¹
+"   " 4: 1 ➛ 1
+"   let g:kernosvim_buffer_index_type = 1
+" <
+let g:kernosvim_buffer_index_type = 0
+
+function! s:kernosvim_bubble_num(num, type) abort
+  let list = []
+  call add(list,['➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓'])
+  call add(list,['➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉'])
+  call add(list,['⓵', '⓶', '⓷', '⓸', '⓹', '⓺', '⓻', '⓼', '⓽', '⓾'])
+  let n = ''
+  try
+    let n = list[a:type][a:num-1]
+  catch
+  endtry
+  return  n
+endfunction
+
+"}}}
 
 "{{{ General
 set nocompatible         " get rid of Vi compatibility mode. SET FIRST!
 set hidden				 " it hides buffers instead of closing them. It allows to switch between buffers without saving changes
 set encoding=utf-8
-filetype off
-set mouse=""
+"filetype off
+set mouse=a
+set backspace=indent,eol,start  " allow backspacing over everything in insert mode
+set clipboard=unnamed
+set nrformats=
 "}}}
 
 "{{{ Vim-plug
 call plug#begin('~/.vim/plugged')
 
 " Appareance
-Plug 'altercation/vim-colors-solarized'
-Plug 'tomasr/molokai'
 Plug 'morhetz/gruvbox'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'bling/vim-bufferline'
 " IDE options
-Plug 'ctrlpvim/ctrlp.vim'
+Plug 'Shougo/denite.nvim'
 Plug 'majutsushi/tagbar'
 Plug 'scrooloose/nerdtree'
+Plug 'ryanoasis/vim-devicons'
 Plug 'Shougo/deoplete.nvim'
 Plug 'zchee/deoplete-go', { 'do': 'make'}
-" Error Handling
-Plug 'neomake/neomake'
-" Miscellaneous functionalities
 Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-surround'
 Plug 'jiangmiao/auto-pairs'
@@ -61,23 +95,29 @@ Plug 'godlygeek/tabular'
 Plug 'SirVer/ultisnips'
 Plug 'Yggdroot/indentLine'
 Plug 'tpope/vim-fugitive'
+" Error Handling
+Plug 'neomake/neomake'
 " Languages
 Plug 'elzr/vim-json', {'for' : 'json'}
-Plug 'fatih/vim-go'
+Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'vim-ruby/vim-ruby'
 
 call plug#end()
 "}}}
 
+"{{{ Appareance
 "{{{ UI Layout
 filetype plugin indent on       " use indentation scripts located in the indent folder of your vim installation.
 " show the absolute number on the cursor line and relative numbers everywhere else (number and relativenumber)
-set number                      " show line numbers
-set relativenumber			    " display line numbers relative to the line with the cursor
-set numberwidth=6               " change the width of the gutter column used for numbering
-set cul                         " highlight current line
-set laststatus=2                " last window always has a statusline
+set number                          " show line numbers
+set relativenumber			        " display line numbers relative to the line with the cursor
+set numberwidth=6                   " change the width of the gutter column used for numbering
+set cul                             " highlight current line
+set laststatus=2                    " last window always has a statusline
 set wildmenu
+set fillchars=vert:│,fold:·         " get rid of the pipe character between windows
+set noshowcmd                       " hide cmd
+set linebreak                       " no break words
 "}}}
 
 "{{{ Theme & Colors
@@ -85,6 +125,100 @@ syntax on
 set t_Co=256
 set background=dark
 colorscheme gruvbox
+let g:gruvbox_contrast_dark = 'soft'
+set guifont=MesloLGMDZ\ Nerd\ Font:h12
+" it sets tilde symbols to bg color
+hi! EndOfBuffer ctermfg=bg
+hi! FoldColumn ctermbg=bg
+"}}}
+
+"{{{ Airline
+let g:airline_theme='gruvbox'
+let g:Powerline_symbols='unicode'
+let g:airline_powerline_fonts=1
+let g:airline_skip_empty_sections = 1
+let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#buffer_idx_mode = 1
+let g:airline#extensions#tabline#buffer_idx_format = {}
+for s:i in range(9)
+    call extend(g:airline#extensions#tabline#buffer_idx_format,
+            \ {s:i : s:kernosvim_bubble_num(s:i,
+            \ g:kernosvim_buffer_index_type). ' '})
+endfor
+let g:airline#extensions#tabline#fnamemod = ':t'
+let g:airline#extensions#tabline#fnamecollapse = 1
+let g:airline#extensions#tabline#fnametruncate = 0
+let g:airline#extensions#tabline#buffers_label = 'Buffers'
+
+if !exists('g:airline_symbols')
+  let g:airline_symbols = {}
+endif
+
+" unicode symbols
+let g:airline_left_sep = '▶'
+let g:airline_right_sep = '◀'
+let g:airline_symbols.crypt = '🔒'
+let g:airline_symbols.linenr = '¶'
+let g:airline_symbols.branch = '⎇'
+let g:airline_symbols.paste = '∥'
+let g:airline_symbols.notexists = '∄'
+let g:airline_symbols.whitespace = 'Ξ'
+
+" powerline symbols
+if get(g:, 'airline_powerline_fonts', 0)
+  let g:airline_left_sep = ''
+  let g:airline_left_alt_sep = ''
+  let g:airline_right_sep = ''
+  let g:airline_right_alt_sep = ''
+  let g:airline_symbols.branch = ''
+  let g:airline_symbols.readonly = ''
+  let g:airline_symbols.linenr = ''
+  let g:airline_symbols.maxlinenr= ''
+endif
+
+
+let g:bufferline_echo=0
+"let g:airline#extensions#tabline#buffer_nr_format = '%s:'
+"let g:airline#extensions#tabline#fnamemod = ':t'
+"let g:airline#extensions#tabline#fnamecollapse = 1
+"let g:airline#extensions#tabline#fnametruncate = 0
+"let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+"let g:airline#extensions#default#section_truncate_width = {
+"    \ 'b': 79,
+"    \ 'x': 60,
+"    \ 'y': 88,
+"    \ 'z': 45,
+"    \ 'warning': 80,
+"    \ 'error': 80,
+"    \ }
+"let g:airline#extensions#default#layout = [
+"    \ [ 'a', 'error', 'warning', 'b', 'c'  ],
+"    \ [ 'x', 'y', 'z'  ]
+"    \ ]
+"let g:airline#extensions#tagbar#enabled = 0
+" Distinct background color is enough to discriminate the warning and
+" error information.
+"let g:airline#extensions#ale#error_symbol = '•'
+"let g:airline#extensions#ale#warning_symbol = '•'
+"let g:airline#extensions#bufferline#overwrite_variables=0
+"}}}
+
+"{{{ Vim-devicons
+let g:WebDevIconsUnicodeDecorateFolderNodes = 1
+let g:WebDevIconsNerdTreeGitPluginForceVAlign = 1
+
+let g:DevIconsEnableFoldersOpenClose = 1
+let g:WebDevIconsOS = 'Darwin'
+let g:WebDevIconsUnicodeDecorateFileNodes = 0
+let g:webdevicons_conceal_nerdtree_brackets = 1
+let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
+"}}}
+"}}} Appareance
+
+"{{{ IDE options
+"{{{ Denite
+nnoremap <silent> <C-j>s :Denite file_rec<CR>
+nnoremap <silent> <C-j>l :Denite buffer<CR>
 "}}}
 
 "{{{ Spaces & Tabs
@@ -102,10 +236,16 @@ set hlsearch						" occurrences searched will be highlighted
 "set incsearch
 "}}}
 
-"{{{ Misc
-set backspace=indent,eol,start  " allow backspacing over everything in insert mode
-set clipboard=unnamed
-set nrformats=
+"{{{ Deoplete
+set completeopt=longest,menuone,preview " auto complete setting
+let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_smart_case = 1
+let g:deoplete#auto_complete_start_length = 1
+let g:deoplete#keyword_patterns = {}
+let g:deoplete#keyword_patterns['default'] = '\h\w*'
+let g:deoplete#omni#input_patterns = {}
+let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+let g:deoplete#sources#go#align_class = 1
 "}}}
 
 "{{{ Vim-multiple-cursors
@@ -132,76 +272,29 @@ let g:UltiSnipsJumpForwardTrigger = "<tab>"
 let g:UltiSnipsJumpBackwardTrigger = "<s-tab>"
 "}}}
 
-"{{{ Airline
-let g:bufferline_echo=0
-let g:airline_theme='gruvbox'
-let g:airline_powerline_fonts=1
-let g:Powerline_symbols='fancy'
-let g:airline#extensions#tabline#enabled=1
-let g:airline#extensions#tabline#buffer_idx_mode = 1
-let g:airline#extensions#tabline#buffer_nr_show = 1
-"let g:airline#extensions#tabline#buffer_nr_format = '%s:'
-"let g:airline#extensions#tabline#fnamemod = ':t'
-"let g:airline#extensions#tabline#fnamecollapse = 1
-"let g:airline#extensions#tabline#fnametruncate = 0
-"let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
-"let g:airline#extensions#default#section_truncate_width = {
-"    \ 'b': 79,
-"    \ 'x': 60,
-"    \ 'y': 88,
-"    \ 'z': 45,
-"    \ 'warning': 80,
-"    \ 'error': 80,
-"    \ }
-"let g:airline#extensions#default#layout = [
-"    \ [ 'a', 'error', 'warning', 'b', 'c'  ],
-"    \ [ 'x', 'y', 'z'  ]
-"    \ ]
-"let g:airline#extensions#tagbar#enabled = 0
-" Distinct background color is enough to discriminate the warning and
-" error information.
-"let g:airline#extensions#ale#error_symbol = '•'
-"let g:airline#extensions#ale#warning_symbol = '•'
-"let g:airline#extensions#bufferline#overwrite_variables=0
-"}}}
-
 "{{{ Auto-pairs
 let g:AutoPairs={'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`'}
 "}}}
 
-"{{{ CtrlP
-let g:ctrlp_cmd = 'CtrlPMRU'
-let g:ctrlp_working_path_mode = 'ra'
-let g:ctrlp_switch_buffer = 'et'  " jump to a file if it's open already
-let g:ctrlp_mruf_max=450    " number of recently opened files
-let g:ctrlp_max_files=0     " do not limit the number of searchable files
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 0
-let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
-let g:ctrlp_match_window = 'bottom,order:btt,max:10,results:10'
-let g:ctrlp_buftag_types = {'go' : '--language-force=go --golang-types=ftv'}
-
-nnoremap <silent> <leader>b :CtrlPCurWD<CR>
+"{{{ NERDTree
+let NERDTreeMinimalUI = 0
+let NERDTreeQuitOnOpen = 1
+let g:NERDTreeDirArrows = 1
 "}}}
 
-"{{{ Deoplete
-"let g:ycm_global_ycm_extra_conf = "~/.ycm_extra_conf.py"
-"let g:ycm_python_binary_path = 'python'
-" make YCM compatible with UltiSnips (using supertab)
-"let g:ycm_key_list_select_completion = ['<C-n>', '<Down>']
-"let g:ycm_key_list_previous_completion = ['<C-p>', '<Up>']
-"let g:SuperTabDefaultCompletionType = '<C-n>'
-set completeopt-=longest,menuone,preview " auto complete setting
-let g:deoplete#enable_at_startup = 1
-let g:deoplete#enable_smart_case = 1
-let g:deoplete#auto_complete_start_length = 1
-let g:deoplete#keyword_patterns = {}
-let g:deoplete#keyword_patterns['default'] = '\h\w*'
-let g:deoplete#omni#input_patterns = {}
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-let g:deoplete#sources#go#align_class = 1
+"{{{ Tagbar
+let g:tagbar_ctags_bin='/usr/local/bin/ctags'
 "}}}
 
+"{{{ Folding
+"set foldmethod=indent
+"set foldcolumn=5                " sets the width for a column on the side of the window to indicate folds
+"set foldnestmax=10              " Maximum nesting for indent and syntax folding
+"set foldlevelstart=1
+"}}}
+"}}}
+
+"{{{ Error Handling
 "{{{ Neomake
 "let g:neomake_verbose=3
 "let g:neomake_logfile='/tmp/error.log'
@@ -249,7 +342,9 @@ let g:neomake_info_sign = {
     \   'texthl': 'NeomakeInfoSign'
     \ }
 "}}}
+"}}}
 
+"{{{ Languages
 "{{{ Vim-go
 let g:go_fmt_autosave=0                   "Disable auto gofmt when files are saved
 let g:go_fmt_command = "goimports"        "Enable goimports instead of gofmt. goimport does everything that gofmt do. Additionally it groups and corrects imported packages. While correcting, goimports removes unused imports and adds missing ones.
@@ -267,16 +362,6 @@ let g:go_highlight_build_constraints = 1
 "{{{ Vim-json
 "let g:vim_json_syntax_conceal = 0
 "}}}
-
-"{{{ Tagbar
-let g:tagbar_ctags_bin='/usr/local/bin/ctags'
-"}}}
-
-"{{{ Folding
-"set foldmethod=indent
-"set foldcolumn=5                " sets the width for a column on the side of the window to indicate folds
-"set foldnestmax=10              " Maximum nesting for indent and syntax folding
-"set foldlevelstart=1
 "}}}
 
 "{{{ Mapping keys
@@ -317,7 +402,7 @@ augroup END
 
 augroup Vim
     autocmd!
-    autocmd BufEnter .vimrc,*.vim :setlocal foldmethod=marker foldmarker={{{,}}} foldcolumn=5 foldlevelstart=0
+    autocmd BufEnter .vimrc,*.vim :setlocal foldmethod=marker foldmarker={{{,}}} foldcolumn=0 foldlevelstart=0
 augroup END
 
 augroup PythonFiles
@@ -330,7 +415,7 @@ augroup END
 
 augroup GoFiles
     autocmd!
-    autocmd FileType go setlocal noexpandtab tabstop=8 softtabstop=8 shiftwidth=8 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
+    autocmd FileType go setlocal noexpandtab tabstop=8 softtabstop=8 shiftwidth=8 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
     autocmd FileType go setlocal list listchars=tab:\¦\ 
     autocmd FileType go nnoremap <silent> <leader>gr <Plug>(go-run)
     autocmd FileType go nnoremap <silent> <leader>gb <Plug>(go-build)
@@ -343,7 +428,7 @@ augroup END
 
 augroup RubyFiles
     autocmd!
-    autocmd FileType ruby setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
+    autocmd FileType ruby setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
     autocmd FileType ruby IndentLinesEnable
 augroup END
 
@@ -355,14 +440,11 @@ augroup END
 
 augroup JsonFiles
     autocmd!
-    autocmd FileType json setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=5
+    autocmd FileType json setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
 augroup END
 
 augroup MakeFiles
     autocmd!
     autocmd FileType make setlocal noexpandtab tabstop=4 softtabstop=4  shiftwidth=4
 augroup END
-"}}}
-
-"{{{ Functions
 "}}}
