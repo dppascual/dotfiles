@@ -18,7 +18,7 @@ export LANG=en_US.UTF-8
 export GOROOT="/usr/local/go"
 export GOPATH="/Users/dppascual/Repositories/golang"
 export GOBIN="$GOPATH/bin"
-export PATH="/usr/local/opt/python@2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$GOROOT/bin:$GOPATH/bin"
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$GOROOT/bin:$GOPATH/bin"
 
 # Vi mode bash
 bindkey -v
@@ -40,10 +40,4 @@ bindkey '\C-n' history-search-forward
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #alias vi="TERM=screen-256color vim"
-alias vi=/usr/local/bin/nvim
-alias vim=/usr/local/bin/nvim
-
-# By default gruvbox will act as usual 256-color theme, but colors wouldn't 
-# be that vivid due to limitations of 256-palette. Running a script to overload 
-# system default 256-color palette with precise gruvbox colors.
-/Users/dppascual/.vim/plugged/gruvbox/gruvbox_256palette_osx.sh
+alias vi=vim
