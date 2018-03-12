@@ -10,9 +10,10 @@
 "   * Vim-plug                                                               "
 "   * Appareance                                                             "
 "       * UI Layout                                                          "
-"       * Theme & Colors                                                     "
 "       * Airline                                                            "
 "       * Vim-devicons                                                       "
+"       * Statusline                                                         "
+"       * Theme & Colors                                                     "
 "   * IDE options                                                            "
 "       * Denite                                                             "
 "       * Spaces & Tabs                                                      "
@@ -35,7 +36,17 @@
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 "{{{ User-declared variables and functions
-
+""
+" Set KernOSVim windows index type, default is 0.
+" >
+"   " types:
+"   " 0: 1 ➛ ➊ 
+"   " 1: 1 ➛ ➀
+"   " 2: 1 ➛ ⓵
+"   let g:kernosvim_windows_index_type = 1
+" <
+let g:kernosvim_windows_index_type = 0
+""
 " Set KernosVim buffer index type, default is 0.
 " >
 "   " types:
@@ -48,7 +59,7 @@
 " <
 let g:kernosvim_buffer_index_type = 0
 
-function! s:kernosvim_bubble_num(num, type) abort
+function! Kernosvim_bubble_num(num, type) abort
   let list = []
   call add(list,['➊', '➋', '➌', '➍', '➎', '➏', '➐', '➑', '➒', '➓'])
   call add(list,['➀', '➁', '➂', '➃', '➄', '➅', '➆', '➇', '➈', '➉'])
@@ -61,6 +72,16 @@ function! s:kernosvim_bubble_num(num, type) abort
   return  n
 endfunction
 
+function! Kernosvim_circled_letter(letter) abort
+  " http://www.unicode.org/charts/beta/nameslist/n_2460.html
+  if index(range(1, 26), char2nr(a:letter) - 64) != -1
+    return nr2char(9397 + char2nr(a:letter) - 64)
+  elseif index(range(1, 26), char2nr(a:letter) - 96) != -1
+    return nr2char(9423 + char2nr(a:letter) - 96)
+  else
+    return ''
+  endif
+endfunction
 "}}}
 
 "{{{ General
@@ -79,8 +100,9 @@ call plug#begin('~/.vim/plugged')
 
 " Appareance
 Plug 'morhetz/gruvbox'
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
+"Plug 'vim-airline/vim-airline'
+"Plug 'vim-airline/vim-airline-themes'
+Plug 'blueyed/vim-diminactive'
 " IDE options
 Plug 'Shougo/denite.nvim'
 Plug 'majutsushi/tagbar'
@@ -100,6 +122,7 @@ Plug 'neomake/neomake'
 " Languages
 Plug 'elzr/vim-json', {'for' : 'json'}
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
+Plug 'jodosha/vim-godebug'
 Plug 'vim-ruby/vim-ruby'
 
 call plug#end()
@@ -111,7 +134,7 @@ filetype plugin indent on       " use indentation scripts located in the indent 
 " show the absolute number on the cursor line and relative numbers everywhere else (number and relativenumber)
 set number                          " show line numbers
 set relativenumber			        " display line numbers relative to the line with the cursor
-set numberwidth=6                   " change the width of the gutter column used for numbering
+set numberwidth=4                   " change the width of the gutter column used for numbering
 set cul                             " highlight current line
 set laststatus=2                    " last window always has a statusline
 set wildmenu
@@ -120,29 +143,19 @@ set noshowcmd                       " hide cmd
 set linebreak                       " no break words
 "}}}
 
-"{{{ Theme & Colors
-syntax on
-set t_Co=256
-set background=dark
-colorscheme gruvbox
-let g:gruvbox_contrast_dark = 'soft'
-set guifont=MesloLGMDZ\ Nerd\ Font:h12
-" it sets tilde symbols to bg color
-hi! EndOfBuffer ctermfg=bg
-hi! FoldColumn ctermbg=bg
-"}}}
-
 "{{{ Airline
+let g:airline#extensions#tabline#enabled=0
 let g:airline_theme='gruvbox'
 let g:Powerline_symbols='unicode'
 let g:airline_powerline_fonts=1
 let g:airline_skip_empty_sections = 1
-let g:airline#extensions#tabline#enabled=1
+let g:airline#extensions#tabline#buffer_nr_show = 0
+let g:airline#extensions#tabline#buffer_nr_format = '%s:'
 let g:airline#extensions#tabline#buffer_idx_mode = 1
 let g:airline#extensions#tabline#buffer_idx_format = {}
 for s:i in range(9)
     call extend(g:airline#extensions#tabline#buffer_idx_format,
-            \ {s:i : s:kernosvim_bubble_num(s:i,
+            \ {s:i : Kernosvim_bubble_num(s:i,
             \ g:kernosvim_buffer_index_type). ' '})
 endfor
 let g:airline#extensions#tabline#fnamemod = ':t'
@@ -213,12 +226,639 @@ let g:WebDevIconsUnicodeDecorateFileNodes = 0
 let g:webdevicons_conceal_nerdtree_brackets = 1
 let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
 "}}}
+
+"{{{ Statusline
+" Init
+""
+" Enable/Disable unicode symbols in statusline
+let s:kernosvim_statusline_unicode_symbols = 1
+""
+" Enable/Disable display mode. Default is 0, mode will be
+" displayed in statusline. To enable this feature:
+let g:kernosvim_enable_statusline_display_mode = 0
+""
+" Set the statusline separators of statusline, default is 'curve'
+" >
+"   Separatos options:
+"     1. arrow
+"     2. curve
+"     3. slant
+"     4. nil
+"     5. fire
+" <
+let s:kernosvim_statusline_separator = 'arrow'
+let s:kernosvim_statusline_inactive_separator = 'arrow'
+
+
+""
+" Define the left section of statusline in active windows.
+let s:kernosvim_statusline_left_sections = ['winnr', 'filename', 'filetype',
+      \ 'syntax checking', 'minor mode lighters', 'version control info']
+""
+" Define the right section of statusline in active windows.
+let s:kernosvim_statusline_right_sections = ['fileformat', 'cursorpos', 'percentage']
+let s:separators = {
+      \ 'arrow' : ["\ue0b0", "\ue0b2"],
+      \ 'curve' : ["\ue0b4", "\ue0b6"],
+      \ 'slant' : ["\ue0b8", "\ue0ba"],
+      \ 'brace' : ["\ue0d2", "\ue0d4"],
+      \ 'fire' : ["\ue0c0", "\ue0c2"],
+      \ 'nil' : ['', ''],
+      \ }
+let s:i_separators = {
+      \ 'arrow' : ["\ue0b1", "\ue0b3"],
+      \ 'bar' : ["|", "|"],
+      \ 'nil' : ['', ''],
+      \ }
+let s:loaded_modes = []
+let s:modes = {
+      \ 'center-cursor': {
+      \ 'icon' : '⊝',
+      \ 'icon_asc' : '-',
+      \ 'desc' : 'centered-cursor mode',
+      \ },
+      \ 'hi-characters-for-long-lines' :{
+      \ 'icon' : '⑧',
+      \ 'icon_asc' : '8',
+      \ 'desc' : 'toggle highlight of characters for long lines',
+      \ },
+      \ 'fill-column-indicator' :{
+      \ 'icon' : Kernosvim_circled_letter('f'),
+      \ 'icon_asc' : 'f',
+      \ 'desc' : 'fill-column-indicator mode',
+      \ },
+      \ 'syntax-checking' :{
+      \ 'icon' : Kernosvim_circled_letter('s'),
+      \ 'icon_asc' : 's',
+      \ 'desc' : 'syntax-checking mode',
+      \ },
+      \ 'spell-checking' :{
+      \ 'icon' : Kernosvim_circled_letter('S'),
+      \ 'icon_asc' : 'S',
+      \ 'desc' : 'spell-checking mode',
+      \ },
+      \ 'whitespace' :{
+      \ 'icon' : Kernosvim_circled_letter('w'),
+      \ 'icon_asc' : 'w',
+      \ 'desc' : 'whitespace mode',
+      \ },
+      \ }
+
+let [s:lsep , s:rsep] = get(s:separators, s:kernosvim_statusline_separator, s:separators['arrow'])
+let [s:ilsep , s:irsep] = get(s:i_separators, s:kernosvim_statusline_inactive_separator, s:i_separators['arrow'])
+
+let s:colors_template = [
+                \ ['#282828', '#a89984', 246, 235],
+                \ ['#a89984', '#504945', 239, 246],
+                \ ['#a89984', '#3c3836', 237, 246],
+                \ ['#665c54', 241],
+                \ ['#282828', '#83a598', 235, 109],
+                \ ['#282828', '#fe8019', 235, 208],
+                \ ['#282828', '#8ec07c', 235, 108],
+                \ ['#282828', '#689d6a', 235, 72],
+                \ ['#282828', '#8f3f71', 235, 132],
+                \ ]
+
+function! s:group2dict(name) abort
+    let id = index(map(range(1999), "synIDattr(v:val, 'name')"), a:name)
+    if id == -1
+        return {
+                    \ 'name' : '',
+                    \ 'ctermbg' : '',
+                    \ 'ctermfg' : '',
+                    \ 'bold' : '',
+                    \ 'italic' : '',
+                    \ 'underline' : '',
+                    \ 'guibg' : '',
+                    \ 'guifg' : '',
+                    \ }
+    endif
+    let rst = {
+                \ 'name' : synIDattr(id, 'name'),
+                \ 'ctermbg' : synIDattr(id, 'bg', 'cterm'),
+                \ 'ctermfg' : synIDattr(id, 'fg', 'cterm'),
+                \ 'bold' : synIDattr(id, 'bold'),
+                \ 'italic' : synIDattr(id, 'italic'),
+                \ 'underline' : synIDattr(id, 'underline'),
+                \ 'guibg' : synIDattr(id, 'bg#'),
+                \ 'guifg' : synIDattr(id, 'fg#'),
+                \ }
+    return rst
+endfunction
+
+function! s:hi(info) abort
+    if empty(a:info) || get(a:info, 'name', '') ==# ''
+        return
+    endif
+    let cmd = 'hi! ' .  a:info.name
+    if !empty(a:info.ctermbg)
+        let cmd .= ' ctermbg=' . a:info.ctermbg
+    endif
+    if !empty(a:info.ctermfg)
+        let cmd .= ' ctermfg=' . a:info.ctermfg
+    endif
+    if !empty(a:info.guibg)
+        let cmd .= ' guibg=' . a:info.guibg
+    endif
+    if !empty(a:info.guifg)
+        let cmd .= ' guifg=' . a:info.guifg
+    endif
+    let style = []
+    for sty in ['bold', 'italic', 'underline']
+        if get(a:info, sty, '') ==# '1'
+            call add(style, sty)
+        endif
+    endfor
+    if !empty(style)
+        let cmd .= ' gui=' . join(style, ',') . ' cterm=' . join(style, ',')
+    endif
+    try
+        exe cmd
+    catch
+    endtry
+endfunction
+
+function! s:hi_separator(a, b) abort
+    let hi_a = s:group2dict(a:a)
+    let hi_b = s:group2dict(a:b)
+    let hi_a_b = {
+                \ 'name' : a:a . '_' . a:b,
+                \ 'guibg' : hi_b.guibg,
+                \ 'guifg' : hi_a.guibg,
+                \ 'ctermbg' : hi_b.ctermbg,
+                \ 'ctermfg' : hi_a.ctermbg,
+                \ }
+    let hi_b_a = {
+                \ 'name' : a:b . '_' . a:a,
+                \ 'guibg' : hi_a.guibg,
+                \ 'guifg' : hi_b.guibg,
+                \ 'ctermbg' : hi_a.ctermbg,
+                \ 'ctermfg' : hi_b.ctermbg,
+                \ }
+    call s:hi(hi_a_b)
+    call s:hi(hi_b_a)
+endfunction
+
+function! Kernosvim_statusline_def_colors() abort
+  let t = s:colors_template
+  exe 'hi! KernosVim_statusline_a ctermbg=' . t[0][2] . ' ctermfg=' . t[0][3] . ' guibg=' . t[0][1] . ' guifg=' . t[0][0]
+  exe 'hi! KernosVim_statusline_a_bold cterm=bold gui=bold ctermbg=' . t[0][2] . ' ctermfg=' . t[0][3] . ' guibg=' . t[0][1] . ' guifg=' . t[0][0]
+  exe 'hi! KernosVim_statusline_ia ctermbg=' . t[0][2] . ' ctermfg=' . t[0][3] . ' guibg=' . t[0][1] . ' guifg=' . t[0][0]
+  exe 'hi! KernosVim_statusline_b ctermbg=' . t[1][2] . ' ctermfg=' . t[1][3] . ' guibg=' . t[1][1] . ' guifg=' . t[1][0]
+  exe 'hi! KernosVim_statusline_c ctermbg=' . t[2][2] . ' ctermfg=' . t[2][3] . ' guibg=' . t[2][1] . ' guifg=' . t[2][0]
+  exe 'hi! KernosVim_statusline_z ctermbg=' . t[3][1] . ' ctermfg=' . t[3][1] . ' guibg=' . t[3][0] . ' guifg=' . t[3][0]
+  hi! KernosVim_statusline_error ctermbg=003 ctermfg=Black guibg=#504945 guifg=#fb4934 gui=bold
+  hi! KernosVim_statusline_warn ctermbg=003 ctermfg=Black guibg=#504945 guifg=#fabd2f gui=bold
+  call s:hi_separator('KernosVim_statusline_a', 'KernosVim_statusline_b')
+  call s:hi_separator('KernosVim_statusline_a_bold', 'KernosVim_statusline_b')
+  call s:hi_separator('KernosVim_statusline_ia', 'KernosVim_statusline_b')
+  call s:hi_separator('KernosVim_statusline_b', 'KernosVim_statusline_c')
+  call s:hi_separator('KernosVim_statusline_b', 'KernosVim_statusline_z')
+  call s:hi_separator('KernosVim_statusline_c', 'KernosVim_statusline_z')
+endfunction
+
+function! s:percentage() abort
+  return ' %P '
+endfunction
+
+function! s:cursorpos() abort
+  return ' %l:%c '
+endfunction
+
+function! s:fileformat() abort
+  return '%{" " . "" . " | " . (&fenc!=""?&fenc:&enc) . " "}'
+endfunction
+
+function! s:statusline_icon_battery_status(v) abort
+  if a:v >= 90
+    return ''
+  elseif a:v >= 75
+    return ''
+  elseif a:v >= 50
+    return ''
+  elseif a:v >= 25
+    return ''
+  else
+    return ''
+  endif
+endfunction
+
+function! s:battery_status() abort
+  if executable('acpi')
+    let battery = split(system('acpi'))[-1][:-2]
+    if s:kernosvim_statusline_unicode_symbols
+      return ' ' . s:statusline_icon_battery_status(battery) . '  '
+    else
+      return ' ⚡' . battery . ' '
+    endif
+  elseif executable('pmset')
+    let battery = matchstr(system('pmset -g batt'), '\d\+%')[:-2]
+    if s:kernosvim_statusline_unicode_symbols
+      return ' ' . s:statusline_icon_battery_status(battery) . '  '
+    else
+      return ' ⚡' . battery . ' '
+    endif
+
+  else
+    return ''
+  endif
+endfunction
+
+function! s:syntax_checking()
+	let counts = neomake#statusline#LoclistCounts()
+	let warnings = get(counts, 'W', 0)
+	let errors = get(counts, 'E', 0)
+	let l =  warnings ? '%#KernosVim_statusline_warn# ● ' . warnings . ' ' : ''
+	let l .=  errors ? (warnings ? '' : ' ') . '%#KernosVim_statusline_error#● ' . errors  . ' ' : ''
+	return l
+endfunction
+
+function! s:hunks() abort
+  let hunks = [0,0,0]
+  try
+    let hunks = GitGutterGetHunkSummary()
+  catch
+  endtry
+  let rst = ''
+  if hunks[0] > 0
+    let rst .= hunks[0] . '+ '
+  endif
+  if hunks[1] > 0
+    let rst .= hunks[1] . '~ '
+  endif
+  if hunks[2] > 0
+    let rst .= hunks[2] . '- '
+  endif
+  return empty(rst) ? '' : ' ' . rst
+endfunction
+
+function! s:git_branch() abort
+    let l:head = fugitive#head()
+    if empty(l:head)
+      call fugitive#detect(getcwd())
+      let l:head = fugitive#head()
+    endif
+    return empty(l:head) ? '' : '  '.l:head . ' '
+endfunction
+
+function! s:modes() abort
+  let m = ' ❖ '
+  for mode in s:loaded_modes
+    if g:kernosvim_statusline_unicode_symbols == 1
+      let m .= s:modes[mode].icon . ' '
+    else
+      let m .= s:modes[mode].icon_asc . ' '
+    endif
+  endfor
+  return m . ' '
+endfunction
+
+function! s:type_of_file() abort
+  return '%{empty(&ft)? "" : " " . &ft . " "}'
+endfunction
+
+function! s:filesize() abort
+  let l:size = getfsize(bufname('%'))
+  if l:size == 0 || l:size == -1 || l:size == -2
+    return ''
+  endif
+  if l:size < 1024
+    return l:size.' bytes '
+  elseif l:size < 1024*1024
+    return printf('%.1f', l:size/1024.0).'k '
+  elseif l:size < 1024*1024*1024
+    return printf('%.1f', l:size/1024.0/1024.0) . 'm '
+  else
+    return printf('%.1f', l:size/1024.0/1024.0/1024.0) . 'g '
+  endif
+endfunction
+
+function! s:filename() abort
+  let name = fnamemodify(bufname('%'), ':t')
+  if empty(name)
+    let name = 'No Name'
+  endif
+  return "%{ &modified ? ' * ' : ' - '}" . s:filesize() . name . ' '
+endfunction
+
+function! Kernosvim_mode(mode)
+  let t = s:colors_template
+  let mode = get(w:, 'kernosvim_statusline_mode', '')
+  if  mode != a:mode
+    if a:mode == 'n'
+        exe 'hi! KernosVim_statusline_a ctermbg=' . t[0][2] . ' ctermfg=' . t[0][3] . ' guibg=' . t[0][1] . ' guifg=' . t[0][0]
+    elseif a:mode == 'i'
+      exe 'hi! KernosVim_statusline_a ctermbg=' . t[4][3] . ' ctermfg=' . t[4][2] . ' guibg=' . t[4][1] . ' guifg=' . t[4][0]
+    elseif a:mode == 'R'
+      exe 'hi! KernosVim_statusline_a ctermbg=' . t[6][3] . ' ctermfg=' . t[6][2] . ' guibg=' . t[6][1] . ' guifg=' . t[6][0]
+    elseif a:mode == 'v' || a:mode == 'V' || a:mode == '^V' || a:mode == 's' || a:mode == 'S' || a:mode == '^S'
+      exe 'hi! KernosVim_statusline_a ctermbg=' . t[5][3] . ' ctermfg=' . t[5][2] . ' guibg=' . t[5][1] . ' guifg=' . t[5][0]
+    endif
+    let w:kernosvim_statusline_mode = a:mode
+  endif
+  return ''
+endfunction
+
+function! Kernosvim_mode_text(mode)
+  if a:mode == 'n'
+    return 'NORMAL '
+  elseif a:mode == 'i'
+    return 'INSERT '
+  elseif a:mode == 'R'
+    return 'REPLACE '
+  elseif a:mode == 'v' || a:mode == 'V' || a:mode == '^V' || a:mode == 's' || a:mode == 'S' || a:mode == '^S'
+    return 'VISUAL '
+  endif
+  return ' '
+endfunction
+
+function! Denite_mode()
+  let t = s:colors_template
+  let dmode = split(denite#get_status_mode())[1]
+  if get(w:, 'kernosvim_statusline_mode', '') != dmode
+    if dmode == 'NORMAL'
+      exe 'hi! KernosVim_statusline_a_bold cterm=bold gui=bold ctermbg=' . t[0][2] . ' ctermfg=' . t[0][3] . ' guibg=' . t[0][1] . ' guifg=' . t[0][0]
+    elseif dmode == 'INSERT'
+      exe 'hi! KernosVim_statusline_a_bold cterm=bold gui=bold ctermbg=' . t[4][3] . ' ctermfg=' . t[4][2] . ' guibg=' . t[4][1] . ' guifg=' . t[4][0]
+    endif
+    call s:hi_separator('KernosVim_statusline_a_bold', 'KernosVim_statusline_b')
+    let w:kernosvim_statusline_mode = dmode
+  endif
+  return dmode
+endfunction
+
+function! Winnr(...) abort
+      return '%{Kernosvim_mode(mode())} %{ Kernosvim_bubble_num(get(w:, "winid", winnr()), g:kernosvim_windows_index_type) } %{Kernosvim_mode_text(mode())}'
+endfunction
+
+let s:registed_sections = {
+      \ 'winnr' : function('Winnr'),
+      \ 'filename' : function('s:filename'),
+      \ 'fileformat' : function('s:fileformat'),
+      \ 'filetype' : function('s:type_of_file'),
+      \ 'minor mode lighters' : function('s:modes'),
+      \ 'version control info' : function('s:git_branch'),
+      \ 'hunks' : function('s:hunks'),
+      \ 'cursorpos' : function('s:cursorpos'),
+      \ 'syntax checking' : function('s:syntax_checking'),
+      \ 'percentage' : function('s:percentage'),
+      \ 'battery status' : function('s:battery_status'),
+      \ }
+
+function! s:kernosvim_statusline_build_check_width(len, sec, winwidth) abort
+  return a:len + s:kernosvim_statusline_build_len(a:sec) < a:winwidth
+endfunction
+
+function! s:kernosvim_statusline_build_len(sec) abort
+  let str = matchstr(a:sec, '%{.*}')
+  if !empty(str)
+    return len(a:sec) - len(str) + len(eval(str[2:-2])) + 4
+  else
+    return len(a:sec) + 4
+  endif
+endfunction
+
+function! s:kernosvim_statusline_build_eval(sec) abort
+  return substitute(a:sec, '%{.*}', '', 'g')
+endfunction
+
+function! s:kernosvim_statusline_build(left_sections, right_sections, lsep, rsep, fname, hi_a, hi_b, hi_c, hi_z, winwidth) abort
+  let l = '%#' . a:hi_a . '#' . a:left_sections[0]
+  let l .= '%#' . a:hi_a . '_' . a:hi_b . '#' . a:lsep
+  let flag = 1
+  let len = 0
+  for sec in filter(a:left_sections[1:], '!empty(v:val)')
+    if s:kernosvim_statusline_build_check_width(len, sec, a:winwidth)
+      let len += s:kernosvim_statusline_build_len(sec)
+      if flag == 1
+        let l .= '%#' . a:hi_b . '#' . sec
+        let l .= '%#' . a:hi_b . '_' . a:hi_c . '#' . a:lsep
+      else
+        let l .= '%#' . a:hi_c . '#' . sec
+        let l .= '%#' . a:hi_c . '_' . a:hi_b . '#' . a:lsep
+      endif
+      let flag = flag * -1
+    endif
+  endfor
+  let l = l[:len(a:lsep) * -1 - 1]
+  if empty(a:right_sections)
+    if flag == 1
+      return l . '%#' . a:hi_c . '#'
+    else
+      return l . '%#' . a:hi_b . '#'
+    endif
+  endif
+  if s:kernosvim_statusline_build_check_width(len, a:fname, a:winwidth)
+    let len += s:kernosvim_statusline_build_len(a:fname)
+    if flag == 1
+      let l .= '%#' . a:hi_c . '_' . a:hi_z . '#' . a:lsep . a:fname . '%='
+    else
+      let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:lsep . a:fname . '%='
+    endif
+  else
+    if flag == 1
+      let l .= '%#' . a:hi_c . '_' . a:hi_z . '#' . a:lsep . '%='
+    else
+      let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:lsep . '%='
+    endif
+  endif
+  let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:rsep
+  let flag = 1
+  for sec in filter(a:right_sections, '!empty(v:val)')
+    if s:kernosvim_statusline_build_check_width(len, sec, a:winwidth)
+      let len += s:kernosvim_statusline_build_len(sec)
+      if flag == 1
+        let l .= '%#' . a:hi_b . '#' . sec
+        let l .= '%#' . a:hi_c . '_' . a:hi_b . '#' . a:rsep
+      else
+        let l .= '%#' . a:hi_c . '#' . sec
+        let l .= '%#' . a:hi_b . '_' . a:hi_c . '#' . a:rsep
+      endif
+      let flag = flag * -1
+    endif
+  endfor
+  return l[:-4]
+endfunction
+
+function! s:inactive() abort
+  let l = '%#KernosVim_statusline_ia#' . Winnr() . '%#KernosVim_statusline_ia_KernosVim_statusline_b#' . s:lsep . '%#KernosVim_statusline_b#'
+  let secs = [s:filename(), " " . &filetype, s:modes(), s:git_branch()]
+  let base = 10
+  for sec in secs
+    let len = s:kernosvim_statusline_build_len(sec)
+    let base += len
+    let l .= '%{ get(w:, "winwidth", 150) < ' . base . ' ? "" : (" ' . s:kernosvim_statusline_build_eval(sec) . ' ' . s:ilsep . '")}'
+  endfor
+  if get(w:, 'winwidth', 150) > base + 10
+    let l .= join(['%=', '%{" " . &ff . "|" . (&fenc!=""?&fenc:&enc) . " "}', ' %P '], s:irsep)
+  endif
+  return l
+endfunction
+
+function! s:active() abort
+  let lsec = []
+  for section in s:kernosvim_statusline_left_sections
+    if has_key(s:registed_sections, section)
+      call add(lsec, call(s:registed_sections[section], []))
+    endif
+  endfor
+  let rsec = []
+  for section in s:kernosvim_statusline_right_sections
+    if has_key(s:registed_sections, section)
+      call add(rsec, call(s:registed_sections[section], []))
+    endif
+  endfor
+  return s:kernosvim_statusline_build(lsec, rsec, s:lsep, s:rsep,  bufname('%'),
+        \ 'KernosVim_statusline_a', 'KernosVim_statusline_b', 'KernosVim_statusline_c', 'KernosVim_statusline_z', winwidth(winnr()))
+endfunction
+
+function! Kernosvim_statusline_get(...) abort
+  for nr in range(1, winnr('$'))
+    call setwinvar(nr, 'winwidth', winwidth(nr))
+    call setwinvar(nr, 'winid', nr)
+  endfor
+  if &filetype ==# 'nerdtree'
+    return '%#KernosVim_statusline_ia#' . Winnr() . '%#KernosVim_statusline_ia_KernosVim_statusline_b#' . s:lsep
+          \ . '%#KernosVim_statusline_b# nerdtree %#KernosVim_statusline_b_KernosVim_statusline_c#' . s:lsep
+  elseif &filetype ==# 'vim-plug'
+    return '%#KernosVim_statusline_a#' . Winnr() . '%#KernosVim_statusline_a_KernosVim_statusline_b#' . s:lsep
+          \ . '%#KernosVim_statusline_b# PlugManager %#KernosVim_statusline_b_KernosVim_statusline_c#' . s:lsep
+  elseif &filetype ==# 'denite'
+    return '%#KernosVim_statusline_a_bold# %{Denite_mode()} '
+          \ . '%#KernosVim_statusline_a_bold_KernosVim_statusline_b#' . s:lsep . ' '
+          \ . '%#KernosVim_statusline_b#%{denite#get_status_sources()} %#KernosVim_statusline_b_KernosVim_statusline_z#' . s:lsep . ' '
+          \ . '%#KernosVim_statusline_z#%=%#KernosVim_statusline_c_KernosVim_statusline_z#' . s:rsep
+          \ . '%#KernosVim_statusline_c# %{denite#get_status_path() . denite#get_status_linenr()}'
+  elseif &filetype ==# 'FlyGrep'
+    return '%#KernosVim_statusline_a_bold# FlyGrep %#KernosVim_statusline_a_KernosVim_statusline_b#' . s:lsep
+          \ . '%#KernosVim_statusline_b# %{KernosVim#plugins#flygrep#mode()} %#KernosVim_statusline_b_KernosVim_statusline_c#' . s:lsep
+          \ . '%#KernosVim_statusline_c# %{getcwd()} %#KernosVim_statusline_c_KernosVim_statusline_b#' . s:lsep
+          \ . '%#KernosVim_statusline_b# %{KernosVim#plugins#flygrep#lineNr()} %#KernosVim_statusline_b_KernosVim_statusline_z#' . s:lsep
+  elseif &filetype ==# 'help'
+    return '%#KernosVim_statusline_a# HelpDescribe %#KernosVim_statusline_a_KernosVim_statusline_b#'
+  endif
+  if a:0 > 0
+    return s:active()
+  else
+    return s:inactive()
+  endif
+endfunction
+
+function! Kernosvim_statusline_init() abort
+  augroup kernOSVim_statusline
+    autocmd!
+    autocmd BufWinEnter,WinEnter,FileType
+          \ * let &l:statusline = Kernosvim_statusline_get(1)
+    autocmd BufWinLeave,WinLeave * let &l:statusline = Kernosvim_statusline_get()
+    autocmd ColorScheme * call Kernosvim_statusline_def_colors()
+  augroup END
+endfunction
+
+call Kernosvim_statusline_init()
+"}}}
+
+"{{{ Theme & Colors
+syntax on
+set t_Co=256
+set background=dark
+colorscheme gruvbox
+"let g:gruvbox_contrast_dark = 'soft'
+set guifont=MesloLGMDZ\ Nerd\ Font:h12
+" it sets tilde symbols to bg color
+hi! EndOfBuffer ctermfg=bg
+hi! FoldColumn ctermbg=bg
+"}}}
 "}}} Appareance
 
 "{{{ IDE options
 "{{{ Denite
+
+" denite option
+let s:denite_options = {
+      \ 'default' : {
+      \ 'winheight' : 15,
+      \ 'mode' : 'insert',
+      \ 'quit' : 'true',
+      \ 'highlight_matched_char' : 'MoreMsg',
+      \ 'highlight_matched_range' : 'MoreMsg',
+      \ 'direction': 'rightbelow',
+      \ 'statusline' : has('patch-7.4.1154') ? v:false : 0,
+      \ 'prompt' : '➭',
+      \ }}
+
+function! s:profile(opts) abort
+  for fname in keys(a:opts)
+    for dopt in keys(a:opts[fname])
+      call denite#custom#option(fname, dopt, a:opts[fname][dopt])
+    endfor
+  endfor
+endfunction
+
+call s:profile(s:denite_options)
+
+" buffer source
+call denite#custom#var(
+      \ 'buffer',
+      \ 'date_format', '%m-%d-%Y %H:%M:%S')
+
+call denite#custom#alias('source', 'file_rec/git', 'file_rec')
+
+" FIND and GREP COMMANDS
+if executable('rg')
+  " Ripgrep command on grep source
+  call denite#custom#var('grep', 'command', ['rg'])
+  call denite#custom#var('grep', 'default_opts',
+        \ ['--vimgrep', '--no-heading'])
+  call denite#custom#var('grep', 'recursive_opts', [])
+  call denite#custom#var('grep', 'pattern_opt', ['--regexp'])
+  call denite#custom#var('grep', 'separator', ['--'])
+  call denite#custom#var('grep', 'final_opts', [])
+
+elseif  executable('pt')
+  " Pt command on grep source
+  call denite#custom#var('grep', 'command', ['pt'])
+  call denite#custom#var('grep', 'default_opts',
+        \ ['--nogroup', '--nocolor', '--smart-case'])
+  call denite#custom#var('grep', 'recursive_opts', [])
+  call denite#custom#var('grep', 'pattern_opt', [])
+  call denite#custom#var('grep', 'separator', ['--'])
+  call denite#custom#var('grep', 'final_opts', [])
+elseif executable('ag')
+  call denite#custom#var('grep', 'command', ['ag'])
+  call denite#custom#var('grep', 'recursive_opts', [])
+  call denite#custom#var('grep', 'pattern_opt', [])
+  call denite#custom#var('grep', 'separator', ['--'])
+  call denite#custom#var('grep', 'final_opts', [])
+  call denite#custom#var('grep', 'default_opts',
+        \ [ '--vimgrep', '--smart-case' ])
+elseif executable('ack')
+  " Ack command
+  call denite#custom#var('grep', 'command', ['ack'])
+  call denite#custom#var('grep', 'recursive_opts', [])
+  call denite#custom#var('grep', 'pattern_opt', ['--match'])
+  call denite#custom#var('grep', 'separator', ['--'])
+  call denite#custom#var('grep', 'final_opts', [])
+  call denite#custom#var('grep', 'default_opts',
+        \ ['--ackrc', $HOME.'/.config/ackrc', '-H',
+        \ '--nopager', '--nocolor', '--nogroup', '--column'])
+endif
+
+call denite#custom#map(
+	  \ 'insert',
+	  \ '<C-n>',
+	  \ '<denite:move_to_next_line>',
+	  \ 'noremap'
+	  \)
+call denite#custom#map(
+	  \ 'insert',
+	  \ '<C-p>',
+	  \ '<denite:move_to_previous_line>',
+	  \ 'noremap'
+	  \)
+
 nnoremap <silent> <C-j>s :Denite file_rec<CR>
 nnoremap <silent> <C-j>l :Denite buffer<CR>
+nnoremap <silent> <C-j>g :Denite grep<CR>
 "}}}
 
 "{{{ Spaces & Tabs
@@ -239,7 +879,12 @@ set hlsearch						" occurrences searched will be highlighted
 "{{{ Deoplete
 set completeopt=longest,menuone,preview " auto complete setting
 let g:deoplete#enable_at_startup = 1
+let g:deoplete#enable_ignore_case = 1
 let g:deoplete#enable_smart_case = 1
+let g:deoplete#enable_camel_case = 1
+let g:deoplete#enable_refresh_always = 1
+let g:deoplete#max_abbr_width = 0
+let g:deoplete#max_menu_width = 0
 let g:deoplete#auto_complete_start_length = 1
 let g:deoplete#keyword_patterns = {}
 let g:deoplete#keyword_patterns['default'] = '\h\w*'
@@ -300,7 +945,6 @@ let g:tagbar_ctags_bin='/usr/local/bin/ctags'
 "let g:neomake_logfile='/tmp/error.log'
 
 let g:neomake_open_list = 2
-let g:neomake_go_enabled_makers = ['scalastyle']
 let g:neomake_go_enabled_makers = [ 'go', 'gometalinter' ]
 let g:neomake_go_gometalinter_maker = {
   \ 'args': [
@@ -326,11 +970,11 @@ let g:neomake_go_gometalinter_maker = {
   \ }
 
 let g:neomake_error_sign = {
-    \ 'text': '✘',
+    \ 'text': '|',
     \ 'texthl': 'NeomakeErrorSign',
     \ }
 let g:neomake_warning_sign = {
-    \ 'text': '!',
+    \ 'text': '|',
     \ 'texthl': 'NeomakeWarningSign',
     \ }
 let g:neomake_message_sign = {
@@ -360,7 +1004,7 @@ let g:go_highlight_build_constraints = 1
 "}}}
 
 "{{{ Vim-json
-"let g:vim_json_syntax_conceal = 0
+let g:vim_json_syntax_conceal = 0
 "}}}
 "}}}
 
@@ -369,7 +1013,7 @@ let g:go_highlight_build_constraints = 1
 nnoremap <silent> <leader>t :TagbarToggle<CR>
 
 " NERDTree
-nnoremap <silent> <leader>d :NERDTreeToggle<CR>
+nnoremap <silent> <C-j>j :NERDTreeToggle<CR>
 
 " Toogle highlighting on/off
 nnoremap <silent> <leader>h :set hlsearch!<cr>
@@ -396,8 +1040,8 @@ augroup END
 augroup Neomake
     autocmd!
     autocmd BufWritePost *.go Neomake
-    autocmd FileType go nnoremap <silent> <leader>lo :lopen<CR>
-    autocmd FileType go nnoremap <silent> <leader>lc :lclose<CR>
+    autocmd FileType go nnoremap <silent> <C-j>no :lopen<CR>
+    autocmd FileType go nnoremap <silent> <C-j>nc :lclose<CR>
 augroup END
 
 augroup Vim
