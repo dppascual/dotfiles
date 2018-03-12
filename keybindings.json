@@ -4,10 +4,8 @@
 { "key": "ctrl+j z",               "command": "workbench.action.toggleZenMode" },
 { "key": "ctrl+j j",                 "command": "workbench.action.toggleSidebarVisibility" },
 { "key": "ctrl+j e",           "command": "workbench.view.explorer" },
-{ "key": "ctrl+j g",          "command": "workbench.view.scm" },
-{ "key": "ctrl+n",                 "command": "extension.vim_cmd+d",
-                                     "when": "editorTextFocus && vim.active && vim.use<D-d> && !inDebugRepl" },
+{ "key": "ctrl+j g",             "command": "editor.action.startFindReplaceAction" },
 { "key": "cmd+j",          "command": "editor.action.insertCursorBelow",
                                      "when": "editorTextFocus" },
-{ "key": ":ls",           "command": "workbench.action.showAllEditors" }
+{ "key": "ctrl+j l",           "command": "workbench.action.showAllEditors" }
 ]

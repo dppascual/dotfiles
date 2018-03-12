@@ -100,11 +100,10 @@ call plug#begin('~/.vim/plugged')
 
 " Appareance
 Plug 'morhetz/gruvbox'
-"Plug 'vim-airline/vim-airline'
-"Plug 'vim-airline/vim-airline-themes'
 Plug 'blueyed/vim-diminactive'
 " IDE options
 Plug 'Shougo/denite.nvim'
+Plug 'wsdjeg/FlyGrep.vim'
 Plug 'majutsushi/tagbar'
 Plug 'scrooloose/nerdtree'
 Plug 'ryanoasis/vim-devicons'
@@ -228,10 +227,10 @@ let g:WebDevIconsNerdTreeAfterGlyphPadding = ' '
 "}}}
 
 "{{{ Statusline
-" Init
+""" Init
 ""
 " Enable/Disable unicode symbols in statusline
-let s:kernosvim_statusline_unicode_symbols = 1
+let g:kernosvim_statusline_unicode_symbols = 1
 ""
 " Enable/Disable display mode. Default is 0, mode will be
 " displayed in statusline. To enable this feature:
@@ -253,7 +252,7 @@ let s:kernosvim_statusline_inactive_separator = 'arrow'
 ""
 " Define the left section of statusline in active windows.
 let s:kernosvim_statusline_left_sections = ['winnr', 'filename', 'filetype',
-      \ 'syntax checking', 'minor mode lighters', 'version control info']
+      \ 'minor mode lighters', 'version control info']
 ""
 " Define the right section of statusline in active windows.
 let s:kernosvim_statusline_right_sections = ['fileformat', 'cursorpos', 'percentage']
@@ -270,13 +269,13 @@ let s:i_separators = {
       \ 'bar' : ["|", "|"],
       \ 'nil' : ['', ''],
       \ }
-let s:loaded_modes = []
+let s:loaded_modes = ['syntax-checking', 'whitespace']
+
+if &cc ==# '80'
+  call add(s:loaded_modes, 'fill-column-indicator')
+endif
+
 let s:modes = {
-      \ 'center-cursor': {
-      \ 'icon' : '⊝',
-      \ 'icon_asc' : '-',
-      \ 'desc' : 'centered-cursor mode',
-      \ },
       \ 'hi-characters-for-long-lines' :{
       \ 'icon' : '⑧',
       \ 'icon_asc' : '8',
@@ -318,6 +317,17 @@ let s:colors_template = [
                 \ ['#282828', '#689d6a', 235, 72],
                 \ ['#282828', '#8f3f71', 235, 132],
                 \ ]
+"let s:colors_template = [
+"                \ ['#282828', '#a89984', 33, 17],
+"                \ ['#a89984', '#504945', 19, 33],
+"                \ ['#a89984', '#3c3836', 18, 33],
+"                \ ['#665c54', 20],
+"                \ ['#282828', '#83a598', 17, 109],
+"                \ ['#282828', '#fe8019', 17, 208],
+"                \ ['#282828', '#8ec07c', 17, 108],
+"                \ ['#282828', '#689d6a', 17, 72],
+"                \ ['#282828', '#8f3f71', 17, 132],
+"                \ ]
 
 function! s:group2dict(name) abort
     let id = index(map(range(1999), "synIDattr(v:val, 'name')"), a:name)
@@ -412,6 +422,7 @@ function! Kernosvim_statusline_def_colors() abort
   call s:hi_separator('KernosVim_statusline_a', 'KernosVim_statusline_b')
   call s:hi_separator('KernosVim_statusline_a_bold', 'KernosVim_statusline_b')
   call s:hi_separator('KernosVim_statusline_ia', 'KernosVim_statusline_b')
+  call s:hi_separator('KernosVim_statusline_a', 'KernosVim_statusline_c')
   call s:hi_separator('KernosVim_statusline_b', 'KernosVim_statusline_c')
   call s:hi_separator('KernosVim_statusline_b', 'KernosVim_statusline_z')
   call s:hi_separator('KernosVim_statusline_c', 'KernosVim_statusline_z')
@@ -427,6 +438,15 @@ endfunction
 
 function! s:fileformat() abort
   return '%{" " . "" . " | " . (&fenc!=""?&fenc:&enc) . " "}'
+endfunction
+
+function! s:whitespace() abort
+  let ln = search('\s\+$', 'n')
+  if ln != 0
+    return ' trailing[' . ln . '] '
+  else
+    return ''
+  endif
 endfunction
 
 function! s:statusline_icon_battery_status(v) abort
@@ -503,9 +523,14 @@ endfunction
 
 function! s:modes() abort
   let m = ' ❖ '
+  let l = len(s:loaded_modes)
   for mode in s:loaded_modes
     if g:kernosvim_statusline_unicode_symbols == 1
-      let m .= s:modes[mode].icon . ' '
+      if s:loaded_modes[l-1] == mode
+        let m .= s:modes[mode].icon . ' '
+      else
+        let m .= s:modes[mode].icon . '  '
+      endif
     else
       let m .= s:modes[mode].icon_asc . ' '
     endif
@@ -554,6 +579,7 @@ function! Kernosvim_mode(mode)
     elseif a:mode == 'v' || a:mode == 'V' || a:mode == '^V' || a:mode == 's' || a:mode == 'S' || a:mode == '^S'
       exe 'hi! KernosVim_statusline_a ctermbg=' . t[5][3] . ' ctermfg=' . t[5][2] . ' guibg=' . t[5][1] . ' guifg=' . t[5][0]
     endif
+    call s:hi_separator('KernosVim_statusline_a', 'KernosVim_statusline_b')
     let w:kernosvim_statusline_mode = a:mode
   endif
   return ''
@@ -622,7 +648,7 @@ function! s:kernosvim_statusline_build_eval(sec) abort
   return substitute(a:sec, '%{.*}', '', 'g')
 endfunction
 
-function! s:kernosvim_statusline_build(left_sections, right_sections, lsep, rsep, fname, hi_a, hi_b, hi_c, hi_z, winwidth) abort
+function! s:kernosvim_statusline_build(left_sections, right_sections, lsep, rsep, hi_a, hi_b, hi_c, hi_z, winwidth) abort
   let l = '%#' . a:hi_a . '#' . a:left_sections[0]
   let l .= '%#' . a:hi_a . '_' . a:hi_b . '#' . a:lsep
   let flag = 1
@@ -648,19 +674,10 @@ function! s:kernosvim_statusline_build(left_sections, right_sections, lsep, rsep
       return l . '%#' . a:hi_b . '#'
     endif
   endif
-  if s:kernosvim_statusline_build_check_width(len, a:fname, a:winwidth)
-    let len += s:kernosvim_statusline_build_len(a:fname)
-    if flag == 1
-      let l .= '%#' . a:hi_c . '_' . a:hi_z . '#' . a:lsep . a:fname . '%='
-    else
-      let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:lsep . a:fname . '%='
-    endif
+  if flag == 1
+    let l .= '%#' . a:hi_c . '_' . a:hi_z . '#' . a:lsep . '%='
   else
-    if flag == 1
-      let l .= '%#' . a:hi_c . '_' . a:hi_z . '#' . a:lsep . '%='
-    else
-      let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:lsep . '%='
-    endif
+    let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:lsep . '%='
   endif
   let l .= '%#' . a:hi_b . '_' . a:hi_z . '#' . a:rsep
   let flag = 1
@@ -684,7 +701,7 @@ function! s:inactive() abort
   let l = '%#KernosVim_statusline_ia#' . Winnr() . '%#KernosVim_statusline_ia_KernosVim_statusline_b#' . s:lsep . '%#KernosVim_statusline_b#'
   let secs = [s:filename(), " " . &filetype, s:modes(), s:git_branch()]
   let base = 10
-  for sec in secs
+  for sec in filter(secs, '!empty(v:val)')
     let len = s:kernosvim_statusline_build_len(sec)
     let base += len
     let l .= '%{ get(w:, "winwidth", 150) < ' . base . ' ? "" : (" ' . s:kernosvim_statusline_build_eval(sec) . ' ' . s:ilsep . '")}'
@@ -708,7 +725,7 @@ function! s:active() abort
       call add(rsec, call(s:registed_sections[section], []))
     endif
   endfor
-  return s:kernosvim_statusline_build(lsec, rsec, s:lsep, s:rsep,  bufname('%'),
+  return s:kernosvim_statusline_build(lsec, rsec, s:lsep, s:rsep, 
         \ 'KernosVim_statusline_a', 'KernosVim_statusline_b', 'KernosVim_statusline_c', 'KernosVim_statusline_z', winwidth(winnr()))
 endfunction
 
@@ -729,11 +746,10 @@ function! Kernosvim_statusline_get(...) abort
           \ . '%#KernosVim_statusline_b#%{denite#get_status_sources()} %#KernosVim_statusline_b_KernosVim_statusline_z#' . s:lsep . ' '
           \ . '%#KernosVim_statusline_z#%=%#KernosVim_statusline_c_KernosVim_statusline_z#' . s:rsep
           \ . '%#KernosVim_statusline_c# %{denite#get_status_path() . denite#get_status_linenr()}'
-  elseif &filetype ==# 'FlyGrep'
-    return '%#KernosVim_statusline_a_bold# FlyGrep %#KernosVim_statusline_a_KernosVim_statusline_b#' . s:lsep
-          \ . '%#KernosVim_statusline_b# %{KernosVim#plugins#flygrep#mode()} %#KernosVim_statusline_b_KernosVim_statusline_c#' . s:lsep
+  elseif &filetype ==# 'SpaceVimFlyGrep'
+    return '%#KernosVim_statusline_a_bold# FlyGrep %#KernosVim_statusline_a_KernosVim_statusline_c#' . s:lsep
           \ . '%#KernosVim_statusline_c# %{getcwd()} %#KernosVim_statusline_c_KernosVim_statusline_b#' . s:lsep
-          \ . '%#KernosVim_statusline_b# %{KernosVim#plugins#flygrep#lineNr()} %#KernosVim_statusline_b_KernosVim_statusline_z#' . s:lsep
+          \ . '%#KernosVim_statusline_b# %{SpaceVim#plugins#flygrep#lineNr()}'
   elseif &filetype ==# 'help'
     return '%#KernosVim_statusline_a# HelpDescribe %#KernosVim_statusline_a_KernosVim_statusline_b#'
   endif
@@ -843,22 +859,44 @@ elseif executable('ack')
         \ '--nopager', '--nocolor', '--nogroup', '--column'])
 endif
 
-call denite#custom#map(
-	  \ 'insert',
-	  \ '<C-n>',
-	  \ '<denite:move_to_next_line>',
-	  \ 'noremap'
-	  \)
-call denite#custom#map(
-	  \ 'insert',
-	  \ '<C-p>',
-	  \ '<denite:move_to_previous_line>',
-	  \ 'noremap'
-	  \)
+" KEY MAPPINGS
+let s:insert_mode_mappings = [
+      \  ['jk', '<denite:enter_mode:normal>', 'noremap'],
+      \ ['<Tab>', '<denite:move_to_next_line>', 'noremap'],
+      \ ['<C-j>', '<denite:move_to_next_line>', 'noremap'],
+      \ ['<S-tab>', '<denite:move_to_previous_line>', 'noremap'],
+      \ ['<C-k>', '<denite:move_to_previous_line>', 'noremap'],
+      \  ['<Esc>', '<denite:enter_mode:normal>', 'noremap'],
+      \  ['<C-c>', '<denite:enter_mode:normal>', 'noremap'],
+      \  ['<C-N>', '<denite:assign_next_matched_text>', 'noremap'],
+      \  ['<C-P>', '<denite:assign_previous_matched_text>', 'noremap'],
+      \  ['<Up>', '<denite:assign_previous_text>', 'noremap'],
+      \  ['<Down>', '<denite:assign_next_text>', 'noremap'],
+      \  ['<C-Y>', '<denite:redraw>', 'noremap'],
+      \ ]
+
+let s:normal_mode_mappings = [
+      \   ["'", '<denite:toggle_select_down>', 'noremap'],
+      \   ['<C-n>', '<denite:jump_to_next_source>', 'noremap'],
+      \   ['<C-p>', '<denite:jump_to_previous_source>', 'noremap'],
+      \   ['gg', '<denite:move_to_first_line>', 'noremap'],
+      \   ['st', '<denite:do_action:tabopen>', 'noremap'],
+      \   ['sg', '<denite:do_action:vsplit>', 'noremap'],
+      \   ['sv', '<denite:do_action:split>', 'noremap'],
+      \   ['q', '<denite:quit>', 'noremap'],
+      \   ['r', '<denite:redraw>', 'noremap'],
+      \ ]
+
+for s:m in s:insert_mode_mappings
+  call denite#custom#map('insert', s:m[0], s:m[1], s:m[2])
+endfor
+for s:m in s:normal_mode_mappings
+  call denite#custom#map('normal', s:m[0], s:m[1], s:m[2])
+endfor
 
 nnoremap <silent> <C-j>s :Denite file_rec<CR>
-nnoremap <silent> <C-j>l :Denite buffer<CR>
-nnoremap <silent> <C-j>g :Denite grep<CR>
+nnoremap <silent> <C-j>l :Denite buffer -mode=normal<CR>
+nnoremap <silent> <C-j>g :FlyGrep<CR>
 "}}}
 
 "{{{ Spaces & Tabs
@@ -895,11 +933,20 @@ let g:deoplete#sources#go#align_class = 1
 
 "{{{ Vim-multiple-cursors
 " Default mapping disable
+function! Multiple_cursors_before()
+    let b:deoplete_disable_auto_complete = 1
+endfunction
+
+function! Multiple_cursors_after()
+    let b:deoplete_disable_auto_complete = 0
+endfunction
+
 let g:multi_cursor_use_default_mapping=0
 let g:multi_cursor_next_key='<C-n>'
 let g:multi_cursor_prev_key='<C-p>'
 let g:multi_cursor_skip_key='<C-x>'
 let g:multi_cursor_quit_key='<C-c>'
+let g:multi_cursor_exit_from_insert_mode=0
 nnoremap <C-c> :call multiple_cursors#quit()<CR>
 "}}}
 
@@ -944,7 +991,16 @@ let g:tagbar_ctags_bin='/usr/local/bin/ctags'
 "let g:neomake_verbose=3
 "let g:neomake_logfile='/tmp/error.log'
 
-let g:neomake_open_list = 2
+function! Kernosvim_quickfix_toggle() abort
+    let nr = winnr()
+    lopen
+    let nr2 = winnr()
+    if nr == nr2
+        lclose
+    endif
+endfunction
+
+let g:neomake_open_list = 0
 let g:neomake_go_enabled_makers = [ 'go', 'gometalinter' ]
 let g:neomake_go_gometalinter_maker = {
   \ 'args': [
@@ -1040,8 +1096,7 @@ augroup END
 augroup Neomake
     autocmd!
     autocmd BufWritePost *.go Neomake
-    autocmd FileType go nnoremap <silent> <C-j>no :lopen<CR>
-    autocmd FileType go nnoremap <silent> <C-j>nc :lclose<CR>
+    autocmd FileType go nnoremap <silent> <C-j>e :call Kernosvim_quickfix_toggle()<CR>
 augroup END
 
 augroup Vim
