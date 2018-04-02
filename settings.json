@@ -4,9 +4,10 @@
     "workbench.sideBar.location": "left",
     "workbench.statusBar.visible": true,
     "zenMode.hideStatusBar": false,
-    "editor  .multiCursorModifier": "alt",
-    "editor  .minimap.enabled": false,
-    "editor  .overviewRulerBorder": false,
-    "editor  .scrollbar.horizontal": "hidden",
-    "editor  .scrollbar.vertical": "hidden"
+    "zenMode.centerLayout": false,
+    "editor.multiCursorModifier": "alt",
+    "editor.minimap.enabled": false,
+    "editor.overviewRulerBorder": false,
+    "editor.scrollbar.horizontal": "hidden",
+    "editor.scrollbar.vertical": "hidden"
 }
