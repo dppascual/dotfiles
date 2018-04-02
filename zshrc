@@ -11,7 +11,7 @@ if [[ -s "${ZDOTDIR:-$HOME}/.zprezto/init.zsh" ]]; then
 fi
 
 # User configuration
-#export TERM=xterm
+export TERM=screen-256color
 export LESS="-F -g -X -i -M -R -S -w -z-4"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
