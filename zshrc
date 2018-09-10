@@ -12,13 +12,16 @@ fi
 
 # User configuration
 export TERM=screen-256color
-export LESS="-F -g -X -i -M -R -S -w -z-4"
+export LESS="-R"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export GOROOT="/usr/local/go"
 export GOPATH="/Users/dppascual/Repositories/golang"
 export GOBIN="$GOPATH/bin"
-export PATH="/usr/local/opt/python@2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$GOROOT/bin:$GOPATH/bin"
+export PATH="/Users/dppascual/.cargo/bin:/usr/local/opt/llvm/bin:/usr/local/opt/python@2/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$GOROOT/bin:$GOPATH/bin"
+export WORKON_HOME="~/Envs"
+
+if [[ -f "/usr/local/bin/virtualenvwrapper.sh" ]]; then source /usr/local/bin/virtualenvwrapper.sh; fi
 
 # Vi mode bash
 bindkey -v
