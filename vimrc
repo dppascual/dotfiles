@@ -107,21 +107,23 @@ Plug 'wsdjeg/FlyGrep.vim'
 Plug 'majutsushi/tagbar'
 Plug 'scrooloose/nerdtree'
 Plug 'ryanoasis/vim-devicons'
-Plug 'Shougo/deoplete.nvim'
-Plug 'zchee/deoplete-go', { 'do': 'make'}
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
 Plug 'terryma/vim-multiple-cursors'
 Plug 'tpope/vim-surround'
 Plug 'jiangmiao/auto-pairs'
 Plug 'godlygeek/tabular'
 Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 Plug 'Yggdroot/indentLine'
 Plug 'tpope/vim-fugitive'
+Plug 'autozimu/LanguageClient-neovim', { 'branch': 'next', 'do': 'bash install.sh' }
 " Error Handling
 Plug 'neomake/neomake'
 " Languages
 Plug 'elzr/vim-json', {'for' : 'json'}
 Plug 'fatih/vim-go', { 'do': ':GoInstallBinaries' }
 Plug 'jodosha/vim-godebug'
+Plug 'rust-lang/rust.vim'
 Plug 'vim-ruby/vim-ruby'
 
 call plug#end()
@@ -794,12 +796,12 @@ let s:denite_options = {
       \ 'default' : {
       \ 'winheight' : 15,
       \ 'mode' : 'insert',
-      \ 'quit' : 'true',
+      \ 'post-action' : 'quit',
       \ 'highlight_matched_char' : 'MoreMsg',
       \ 'highlight_matched_range' : 'MoreMsg',
       \ 'direction': 'rightbelow',
       \ 'statusline' : has('patch-7.4.1154') ? v:false : 0,
-      \ 'prompt' : '➭',
+      \ 'prompt' : '>'
       \ }}
 
 function! s:profile(opts) abort
@@ -903,9 +905,9 @@ nnoremap <silent> <C-j>g :FlyGrep<CR>
 " Indentation options by default
 set autoindent			" Copy the indentation from current line when starting a new line
 set expandtab			" When enabled, causes spaces to be used in place of tab characters
-set tabstop=4           " Specifies the width of a tab character
-set softtabstop=4       " When enabled, fine tunes the amount of whitespace to be inserted
-set shiftwidth=4  	    " Determines the amount of whitespace to insert or remove using indentatioin when you press >>, << or ==
+set tabstop=2           " Specifies the width of a tab character
+set softtabstop=2       " When enabled, fine tunes the amount of whitespace to be inserted
+set shiftwidth=2  	    " Determines the amount of whitespace to insert or remove using indentatioin when you press >>, << or ==
                         " It also affects how automatic indentation works with smarttab
 "}}}
 
@@ -927,11 +929,21 @@ let g:deoplete#auto_complete_start_length = 1
 let g:deoplete#keyword_patterns = {}
 let g:deoplete#keyword_patterns['default'] = '\h\w*'
 let g:deoplete#omni#input_patterns = {}
-let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
-let g:deoplete#sources#go#align_class = 1
+"let g:deoplete#sources#go#sort_class = ['package', 'func', 'type', 'var', 'const']
+"let g:deoplete#sources#go#align_class = 1
+call deoplete#custom#source('LanguageClient',
+            \ 'min_pattern_length',
+            \ 2)
 inoremap <expr><C-j> pumvisible() ? "\<C-n>" : "\<Down>"
 inoremap <expr><C-k> pumvisible() ? "\<C-p>" : "\<Up>"
 inoremap <expr><CR> pumvisible() ? "\<C-y>" : "\<CR>"
+let g:LanguageClient_serverCommands = {
+    \ 'go': ['go-langserver'],
+    \ 'c': ['clangd'],
+    \ 'rust': ['~/.cargo/bin/rustup', 'run', 'stable', 'rls'],
+    \ }
+let g:LanguageClient_autoStart = 1
+nnoremap <silent> K :call LanguageClient#textDocument_hover()<CR>
 "}}}
 
 "{{{ Vim-multiple-cursors
@@ -1117,7 +1129,7 @@ augroup END
 
 augroup GoFiles
     autocmd!
-    autocmd FileType go setlocal noexpandtab tabstop=8 softtabstop=8 shiftwidth=8 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
+    autocmd FileType go setlocal noexpandtab tabstop=4 softtabstop=4 shiftwidth=4 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
     autocmd FileType go setlocal list listchars=tab:\¦\ 
     autocmd FileType go nnoremap <silent> <leader>gr <Plug>(go-run)
     autocmd FileType go nnoremap <silent> <leader>gb <Plug>(go-build)
@@ -1142,7 +1154,7 @@ augroup END
 
 augroup JsonFiles
     autocmd!
-    autocmd FileType json setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
+    autocmd FileType json setlocal expandtab tabstop=4 softtabstop=4 shiftwidth=4 foldlevel=99 foldmethod=syntax foldnestmax=2 foldcolumn=0
 augroup END
 
 augroup MakeFiles
