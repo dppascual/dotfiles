@@ -1,0 +1,32 @@
+theme = "catppuccin_frappe"
+
+[editor]
+line-number = "relative"
+mouse = false
+cursorline = true
+true-color = true
+auto-pairs = true
+
+[editor.indent-guides]
+render = true
+
+[editor.statusline]
+left = ["mode", "spinner", "file-name", "diagnostics"] 
+right = ["file-encoding", "file-type", "file-line-ending", "position-percentage", "position"] 
+separator = "│"
+mode.normal = "NORMAL"
+mode.insert = "INSERT"
+mode.select = "SELECT"
+
+[editor.lsp]
+display-messages = true
+auto-signature-help = true
+display-signature-help-docs = true
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.file-picker]
+hidden = false
