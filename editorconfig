@@ -1,0 +1,69 @@
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+curly_bracket_next_line = false
+
+# JSON - http://json.org/
+# YAML - http://yaml.org/
+[*.{json,yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Python - https://www.python.org/
+[*.py]
+indent_style = space
+indent_size = 4
+
+# Lua - https://www.lua.org
+# http://lua-users.org/wiki/LuaStyleGuide
+[*.{lua,luacheckrc}]
+indent_style = space
+indent_size = 4
+
+# Ruby - https://www.ruby-lang.org/
+# Rake - https://github.com/ruby/rake
+[{*.rb,*.rake,Rakefile}]
+indent_style = space
+indent_size = 2
+
+# Shell script (bash) - https://www.gnu.org/software/bash/manual/bash.html
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Rust
+# https://github.com/rust-lang/rust/blob/master/src/doc/style/style/whitespace.md
+[*.rs]
+indent_size = 4
+indent_style = space
+
+# Golang - https://golang.org/
+[{*.go,go.mod,go.sum,go.work}]
+indent_style = tab
+indent_size = 4
+tab_width=4
+
+# Makefile - https://www.gnu.org/software/make/manual/make.html
+[Makefile]
+indent_style = tab
+indent_size = 4
+tab_width=4
+
+# Markdown
+[*.{md,markdown}]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = false
+
+# Protobuf
+[*.proto]
+indent_style = space
+indent_size = 2
