@@ -11,7 +11,7 @@ local servers = {
                     enable = true,
                 },
                 validate = {
-                    enable = true
+                    enable = true,
                 },
             },
         },
@@ -45,7 +45,7 @@ local servers = {
     yamlls = {
         yaml = {
             schemaStore = {
-                url = "https://www.schemastore.org/api/json/catalog.json",
+                url = 'https://www.schemastore.org/api/json/catalog.json',
                 enable = true,
             },
         },
@@ -60,41 +60,41 @@ local servers = {
                 },
                 completion = {
                     workspaceWord = true,
-                    callSnippet = "Both",
+                    callSnippet = 'Both',
                 },
                 misc = {
                     parameters = {
-                        "--log-level=trace",
+                        '--log-level=trace',
                     },
                 },
                 diagnostics = {
                     -- enable = false,
                     groupSeverity = {
-                        strong = "Warning",
-                        strict = "Warning",
+                        strong = 'Warning',
+                        strict = 'Warning',
                     },
                     groupFileStatus = {
-                        ["ambiguity"] = "Opened",
-                        ["await"] = "Opened",
-                        ["codestyle"] = "None",
-                        ["duplicate"] = "Opened",
-                        ["global"] = "Opened",
-                        ["luadoc"] = "Opened",
-                        ["redefined"] = "Opened",
-                        ["strict"] = "Opened",
-                        ["strong"] = "Opened",
-                        ["type-check"] = "Opened",
-                        ["unbalanced"] = "Opened",
-                        ["unused"] = "Opened",
+                        ['ambiguity'] = 'Opened',
+                        ['await'] = 'Opened',
+                        ['codestyle'] = 'None',
+                        ['duplicate'] = 'Opened',
+                        ['global'] = 'Opened',
+                        ['luadoc'] = 'Opened',
+                        ['redefined'] = 'Opened',
+                        ['strict'] = 'Opened',
+                        ['strong'] = 'Opened',
+                        ['type-check'] = 'Opened',
+                        ['unbalanced'] = 'Opened',
+                        ['unused'] = 'Opened',
                     },
-                    unusedLocalExclude = { "_*" },
+                    unusedLocalExclude = { '_*' },
                 },
                 format = {
                     enable = false,
                     defaultConfig = {
-                        indent_style = "space",
-                        indent_size = "2",
-                        continuation_indent_size = "2",
+                        indent_style = 'space',
+                        indent_size = '2',
+                        continuation_indent_size = '2',
                     },
                 },
             },

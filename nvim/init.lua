@@ -10,24 +10,24 @@ require('user.opts')
 -- that's why is loaded before lazy plugin manager
 require('user.keymaps')
 
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({
-      "git",
-      "clone",
-      "--filter=blob:none",
-      "https://github.com/folke/lazy.nvim.git",
-      "--branch=stable", -- latest stable release
-      lazypath,
-  })
+    vim.fn.system({
+        'git',
+        'clone',
+        '--filter=blob:none',
+        'https://github.com/folke/lazy.nvim.git',
+        '--branch=stable', -- latest stable release
+        lazypath,
+    })
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup("user.plugins", {
+require('lazy').setup('user.plugins', {
     defaults = { lazy = false },
     checker = { enabled = true },
     diff = {
-        cmd = "terminal_git",
+        cmd = 'terminal_git',
     },
     performance = {
         cache = {
@@ -36,15 +36,15 @@ require("lazy").setup("user.plugins", {
         },
         rtp = {
             disabled_plugins = {
-                "gzip",
-                "matchit",
-                "matchparen",
+                'gzip',
+                'matchit',
+                'matchparen',
                 -- "netrwPlugin",
-                "rplugin",
-                "tarPlugin",
-                "tohtml",
-                "tutor",
-                "zipPlugin"
+                'rplugin',
+                'tarPlugin',
+                'tohtml',
+                'tutor',
+                'zipPlugin',
             },
         },
     },
@@ -55,17 +55,17 @@ require("lazy").setup("user.plugins", {
     ui = {
         border = 'rounded',
         icons = {
-            cmd = "⌘",
-            config = "🛠",
-            event = "📅",
-            ft = "📂",
-            init = "⚙",
-            keys = "🗝",
-            plugin = "🔌",
-            runtime = "💻",
-            source = "📄",
-            start = "🚀",
-            task = "📌",
+            cmd = '⌘',
+            config = '🛠',
+            event = '📅',
+            ft = '📂',
+            init = '⚙',
+            keys = '🗝',
+            plugin = '🔌',
+            runtime = '💻',
+            source = '📄',
+            start = '🚀',
+            task = '📌',
         },
     },
 })
