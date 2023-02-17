@@ -173,6 +173,7 @@ return {
             ensure_installed = {
                 'stylua',
                 'shfmt',
+                'gomodifytags',
             },
         },
         ---@param opts MasonSettings | {ensure_installed: string[]}
@@ -194,12 +195,14 @@ return {
         'jose-elias-alvarez/null-ls.nvim',
         config = function()
             local formatting = require('null-ls').builtins.formatting
+            local code_action = require('null-ls').builtins.code_actions
 
             require('null-ls').setup({
                 debug = false,
                 sources = {
                     formatting.stylua,
                     formatting.shfmt,
+                    code_action.gomodifytags,
                 },
             })
         end,
