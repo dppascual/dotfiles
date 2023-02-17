@@ -152,6 +152,7 @@ return {
             end
 
             -- Keymaps
+            --
             keymapFn(
                 '<leader>?',
                 "lua require('fzf-lua').builtin({ winopts = { height =0.33, width = 1 }})",
@@ -160,15 +161,15 @@ return {
             keymapFn(
                 '<leader>:',
                 require('fzf-lua').commands,
-                { desc = '[?] User Commands' }
+                { desc = '[:] User Commands' }
             )
 
-            -- Files
+            -- Buffers
             --
             keymapFn(
-                '<leader>/',
-                require('fzf-lua').blines,
-                { desc = '[/] Fuzzily search in current buffer' }
+                '<leader>,',
+                require('fzf-lua').buffers,
+                { desc = '[,] Search Buffers' }
             )
             keymapFn(
                 '<leader>sb',
@@ -180,24 +181,52 @@ return {
                 "lua require('fzf-lua').lines({ winopts = { preview = { horizontal = 'right:60%' }}})",
                 { desc = 'Fuzzily search in all opened buffers' }
             )
-            keymapFn(
-                '<leader>,',
-                require('fzf-lua').buffers,
-                { desc = '[,] Search Buffers' }
-            )
+
+            -- Files
+            --
             keymapFn(
                 '<leader>ff',
                 require('fzf-lua').files,
                 { desc = '[F]ind [F]iles' }
             )
             keymapFn(
+                '<leader>fF',
+                string.format(
+                    "lua require('fzf-lua').files({ cwd = '%s' })",
+                    vim.fn.expand('%:p:h')
+                ),
+                { desc = '[F]ind [F]iles in Current Working Directory' }
+            )
+            keymapFn(
                 '<leader>sf',
-                "lua require('fzf-lua').live_grep({ winopts = { preview = { horizontal = 'right:60%' }}})",
+                "lua require('fzf-lua').grep({ search = '', fzf_opts = { ['--nth'] = '2..' }, winopts = { preview = { horizontal = 'right:60%' }}})",
                 { desc = '[S]earch in [F]iles' }
             )
-            -- keymapFn('<leader>sF', "<cmd>lua require('fzf-lua').files({ cwd='~/<folder>' })<CR>", { noremap = true, silent = true, desc = '[S]earch [F]iles in Current Working Directory' })
+            keymapFn(
+                '<leader>sF',
+                string.format(
+                    "lua require('fzf-lua').grep({ cwd = '%s', search = '', fzf_opts = { ['--nth'] = '2..' }, winopts = { preview = { horizontal = 'right:60%%' }}})",
+                    vim.fn.expand('%:p:h')
+                ),
+                { desc = '[S]earch in [F]iles in Current Working Directory' }
+            )
+            vim.api.nvim_create_user_command(
+                'LiveGrep',
+                "lua require('fzf-lua').live_grep_glob({ winopts = { preview = { horizontal = 'right:60%' }}})",
+                { desc = '[S]earch file in [L]ive' }
+            )
+            vim.api.nvim_create_user_command(
+                'LiveGrepCWD',
+                string.format(
+                    "lua require('fzf-lua').live_grep_glob({ cwd = '%s', winopts = { preview = { horizontal = 'right:60%%' }}})",
+                    vim.fn.expand('%:p:h')
+                ),
+                {
+                    desc = '[S]earch file in [L]ive in Current Working Directory',
+                }
+            )
 
-            -- Grep
+            -- Search
             --
             keymapFn(
                 '<leader>sw',
