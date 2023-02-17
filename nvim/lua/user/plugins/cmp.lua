@@ -73,19 +73,15 @@ function M.config()
                 if
                     cmp.core.view.custom_entries_view:is_direction_top_down()
                 then
-                    (
-                        {
-                            next = cmp.select_next_item,
-                            prev = cmp.select_prev_item,
-                        }
-                    )[direction]({ behavior = behavior })
+                    ({
+                        next = cmp.select_next_item,
+                        prev = cmp.select_prev_item,
+                    })[direction]({ behavior = behavior })
                 else
-                    (
-                        {
-                            next = cmp.select_prev_item,
-                            prev = cmp.select_next_item,
-                        }
-                    )[direction]({ behavior = behavior })
+                    ({
+                        next = cmp.select_prev_item,
+                        prev = cmp.select_next_item,
+                    })[direction]({ behavior = behavior })
                 end
             else
                 fallback()
@@ -95,7 +91,11 @@ function M.config()
 
     cmp.setup({
         sources = {
-            { name = 'nvim_lsp', max_item_count = 20 },
+            {
+                name = 'nvim_lsp',
+                max_item_count = 20,
+                keyword_length = 0,
+            },
             { name = 'luasnip' },
             {
                 name = 'buffer',
