@@ -147,7 +147,7 @@ M.on_attach = function(client, bufnr)
 
     if
         client.server_capabilities.codeActionProvider
-        and vim.bo.filetype == 'go'
+        and client.name == 'gopls'
     then
         vim.api.nvim_create_autocmd({ 'BufWritePre' }, {
             buffer = bufnr,

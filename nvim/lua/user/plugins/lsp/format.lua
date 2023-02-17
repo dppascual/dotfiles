@@ -19,6 +19,7 @@ helpers.organizeImports = function(client, bufnr, wait_ms)
                     client.offset_encoding
                 )
             else
+                print(vim.inspect(r.command))
                 vim.lsp.buf.execute_command(r.command)
             end
         end
