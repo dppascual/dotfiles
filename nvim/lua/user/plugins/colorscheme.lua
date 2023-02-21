@@ -1,5 +1,14 @@
 return {
     {
+        'AlexvZyl/nordic.nvim',
+        enabled = false,
+        lazy = false,
+        priority = 1000,
+        config = function()
+            require('nordic').load()
+        end,
+    },
+    {
         'EdenEast/nightfox.nvim',
         enabled = true,
         lazy = false,
@@ -16,8 +25,8 @@ return {
             })
             vim.cmd('colorscheme terafox')
             vim.api.nvim_set_hl(0, 'NormalFloat', { bg = '#152528' })
-            vim.api.nvim_set_hl(0, 'Visual', { bg = '#425e5e' })
-            vim.api.nvim_set_hl(0, 'Search', { fg = '#152528', bg = '#fda47f' })
+            -- vim.api.nvim_set_hl(0, 'Visual', { bg = '#425e5e' })
+            -- vim.api.nvim_set_hl(0, 'Search', { fg = '#152528', bg = '#fda47f' })
         end,
     },
     {
