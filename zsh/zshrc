@@ -93,7 +93,7 @@ alias pf='fzf --preview='\''/usr/local/bin/bat --color=always --style=numbers {}
 #####
 
 ### Load local completions
-fpath=(~/.zsh $fpath)
+# fpath=(~/.zsh $fpath)
 
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
 export PATH="/Users/dppascual/.rd/bin:$PATH"
@@ -103,7 +103,7 @@ autoload -U +X bashcompinit && bashcompinit
 #complete -o nospace -C /usr/local/bin/mc mc
 
 ### ZSH Completion
-autoload -Uz compinit && compinit
-zstyle ':completion:*' menu select
+# autoload -Uz compinit && compinit
+# zstyle ':completion:*' menu select
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
