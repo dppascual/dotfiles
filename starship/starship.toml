@@ -1,0 +1,60 @@
+# A minimal left prompt
+format = """$directory$git_branch$git_status$character"""
+
+# # move the rest of the prompt to the right
+right_format = """$all"""
+
+[character]
+format = "[❯](bold red)[❯](bold yellow)[❯](bold green) "
+
+[directory]
+format = "[$path]($style)[$read_only]($read_only_style) "
+truncation_length = 1
+truncate_to_repo = true
+truncation_symbol = ''
+
+[cmd_duration]
+disabled = true
+
+[status]
+disabled = false
+symbol = ' '
+
+[git_branch]
+symbol = " "
+truncation_length = 20
+truncation_symbol = "…"
+style="bold purple"
+
+[aws]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[docker_context]
+symbol = " "
+
+[package]
+disabled = true
+
+[java]
+disabled = true
+
+[golang]
+symbol = " "
+
+[guix_shell]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[nix_shell]
+symbol = " "
+
+[python]
+symbol = " "
+
+[rust]
+symbol = "🦀 "
