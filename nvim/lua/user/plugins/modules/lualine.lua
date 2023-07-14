@@ -1,20 +1,10 @@
 -- Statusline
 --
--- return {
---
---   {
---     "nvim-lualine/lualine.nvim",
---   event = "VeryLazy",
---   enabled = false,
---     config = true,
---     },
--- }
 
 local M = {
     'nvim-lualine/lualine.nvim',
     event = 'VeryLazy',
     enabled = true,
-    dependencies = { 'projekt0n/github-nvim-theme' },
 }
 
 function M.config()
@@ -95,13 +85,13 @@ function M.config()
     ins_left({
         'filename',
         cond = conditions.buffer_not_empty,
-        path = 0,
+        path = 1,
         file_status = true,
         symbols = {
-            modified = '[+]', -- Text to show when the file is modified.
-            readonly = '[-]', -- Text to show when the file is non-modifiable or readonly.
+            modified = '[+]',      -- Text to show when the file is modified.
+            readonly = '[-]',      -- Text to show when the file is non-modifiable or readonly.
             unnamed = '[No Name]', -- Text to show for unnamed buffers.
-            newfile = '[New]', -- Text to show for newly created file before first write
+            newfile = '[New]',     -- Text to show for newly created file before first write
         },
     })
 
@@ -121,9 +111,11 @@ function M.config()
         -- Lsp server name .
         function()
             local msg = {}
-            -- local msg = {'No Active Lsp'}
+            local bufnr = vim.api.nvim_get_current_buf()
             local buf_ft = vim.api.nvim_buf_get_option(0, 'filetype')
-            local clients = vim.lsp.get_active_clients()
+            local clients = vim.lsp.get_active_clients({
+                bufnr = bufnr,
+            })
             if next(clients) == nil then
                 return 'No active Lsp'
             end
