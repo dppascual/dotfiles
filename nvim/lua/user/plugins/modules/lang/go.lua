@@ -13,6 +13,25 @@ return {
         end,
     },
 
+    -- Add golang tools to mason
+    {
+        'jose-elias-alvarez/null-ls.nvim',
+        opts = function(_, opts)
+            local nls = require('null-ls')
+            opts.sources = opts.sources or {}
+            vim.list_extend(opts.sources, {
+                nls.builtins.formatting.goimports_reviser,
+            })
+        end,
+        dependencies = {
+            'mason.nvim',
+            opts = function(_, opts)
+                opts.ensure_installed = opts.ensure_installed or {}
+                vim.list_extend(opts.ensure_installed, { 'goimports-reviser' })
+            end,
+        },
+    },
+
     -- Correctly setup lspconfig for yaml
     --
     {
@@ -63,18 +82,22 @@ return {
                 gopls = function(_, opts)
                     -- workaround for gopls not supporting semanticTokensProvider
                     -- https://github.com/golang/go/issues/54531#issuecomment-1464982242
-                    require("user.util").on_attach(function(client, _)
-                        if client.name == "gopls" then
-                            if not client.server_capabilities.semanticTokensProvider then
-                                local semantic = client.config.capabilities.textDocument.semanticTokens
-                                client.server_capabilities.semanticTokensProvider = {
-                                    full = true,
-                                    legend = {
-                                        tokenTypes = semantic.tokenTypes,
-                                        tokenModifiers = semantic.tokenModifiers,
-                                    },
-                                    range = true,
-                                }
+                    require('user.util').on_attach(function(client, _)
+                        if client.name == 'gopls' then
+                            if
+                                not client.server_capabilities.semanticTokensProvider
+                            then
+                                local semantic =
+                                    client.config.capabilities.textDocument.semanticTokens
+                                client.server_capabilities.semanticTokensProvider =
+                                    {
+                                        full = true,
+                                        legend = {
+                                            tokenTypes = semantic.tokenTypes,
+                                            tokenModifiers = semantic.tokenModifiers,
+                                        },
+                                        range = true,
+                                    }
                             end
                         end
                     end)
