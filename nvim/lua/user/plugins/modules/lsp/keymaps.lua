@@ -6,21 +6,20 @@ M.on_attach = function(client, bufnr)
     -- Enable inlay-hints
     --
     if client.server_capabilities.inlayHintProvider then
-        vim.lsp.inlay_hint(bufnr, true)
-        --     vim.api.nvim_create_autocmd('InsertEnter', {
-        --         buffer = bufnr,
-        --         callback = function()
-        --             vim.lsp.buf.inlay_hint(bufnr, false)
-        --         end,
-        --         group = 'LSP',
-        --     })
-        --     vim.api.nvim_create_autocmd({ 'BufEnter' }, {
-        --         buffer = bufnr,
-        --         callback = function()
-        --             vim.lsp.buf.inlay_hint(bufnr, true)
-        --         end,
-        --         group = 'LSP',
-        --     })
+        vim.api.nvim_create_autocmd('InsertEnter', {
+            buffer = bufnr,
+            callback = function()
+                vim.lsp.inlay_hint(bufnr, false)
+            end,
+            group = 'LSP',
+        })
+        vim.api.nvim_create_autocmd({ 'BufReadPre', 'InsertLeave' }, {
+            buffer = bufnr,
+            callback = function()
+                vim.lsp.inlay_hint(bufnr, true)
+            end,
+            group = 'LSP',
+        })
     end
 
     -- Keymaps
@@ -43,34 +42,54 @@ M.on_attach = function(client, bufnr)
 
     keymapFn('gd', ':Glance definitions', { desc = '[G]oto [D]efinition' })
     keymapFn('gr', ':Glance references', { desc = '[G]oto [R]eferences' })
-    keymapFn('gi', ':Glance implementations', { desc = '[G]oto [I]mplementation' })
-    keymapFn('gt', ':Glance type_definitions', { desc = '[G]oto [T]ype Definition' })
+    keymapFn(
+        'gi',
+        ':Glance implementations',
+        { desc = '[G]oto [I]mplementation' }
+    )
+    keymapFn(
+        'gt',
+        ':Glance type_definitions',
+        { desc = '[G]oto [T]ype Definition' }
+    )
     keymapFn('K', vim.lsp.buf.hover, { desc = 'Hover Documentation' })
-    keymapFn('<C-k>', vim.lsp.buf.signature_help, { desc = 'Signature Help', mode = { 'i', 'n' } })
-    keymapFn('<leader>ds', "lua require'telescope.builtin'.lsp_document_symbols()", { desc = 'Document [S]ymbols' })
-    keymapFn('<leader>ws', "lua require'telescope.builtin'.lsp_dynamic_workspace_symbols()", { desc = 'Workspace [S]ymbols' })
+    keymapFn(
+        '<C-k>',
+        vim.lsp.buf.signature_help,
+        { desc = 'Signature Help', mode = { 'i', 'n' } }
+    )
+    keymapFn(
+        '<leader>ds',
+        "lua require'telescope.builtin'.lsp_document_symbols()",
+        { desc = 'Document [S]ymbols' }
+    )
+    keymapFn(
+        '<leader>ws',
+        "lua require'telescope.builtin'.lsp_dynamic_workspace_symbols()",
+        { desc = 'Workspace [S]ymbols' }
+    )
 
     if client.server_capabilities.renameProvider then
         keymapFn('<leader>r', vim.lsp.buf.rename, { desc = '[R]ename' })
     end
 
     if client.server_capabilities.codeActionProvider then
-        keymapFn('<leader>ca', vim.lsp.buf.code_action, { desc = 'Code [A]ction', mode = { 'n', 'v' } })
-
         keymapFn(
-            "<leader>cA",
-            function()
-                vim.lsp.buf.code_action({
-                    context = {
-                        only = {
-                            "source",
-                        },
-                        diagnostics = {},
-                    },
-                })
-            end,
+            '<leader>ca',
+            vim.lsp.buf.code_action,
             { desc = 'Code [A]ction', mode = { 'n', 'v' } }
         )
+
+        keymapFn('<leader>cA', function()
+            vim.lsp.buf.code_action({
+                context = {
+                    only = {
+                        'source',
+                    },
+                    diagnostics = {},
+                },
+            })
+        end, { desc = 'Code [A]ction', mode = { 'n', 'v' } })
     end
 
     -- Lesser used LSP functionality
@@ -96,7 +115,7 @@ M.on_attach = function(client, bufnr)
         vim.api.nvim_create_autocmd('BufWritePre', {
             buffer = bufnr,
             callback = function()
-                if vim.api.nvim_buf_get_option(bufnr, "filetype") == 'go' then
+                if vim.api.nvim_buf_get_option(bufnr, 'filetype') == 'go' then
                     local params = vim.lsp.util.make_range_params(
                         nil,
                         client.offset_encoding
