@@ -1,39 +1,28 @@
 return {
-    -- {
-    --     'rose-pine/neovim',
-    --     as = 'rose-pine',
-    --     config = function()
-    --         require('rose-pine').setup({
-    --             disable_background = true,
-    --             disable_float_background = true,
-    --         })
-    --         vim.cmd('colorscheme rose-pine')
-    --     end,
-    -- },
     {
-        'rockyzhang24/arctic.nvim',
-        branch = 'v2',
-        dependencies = {
-            'rktjmp/lush.nvim',
-            {
-                'xiyaowong/transparent.nvim',
-                opts = {
-                    extra_groups = {
-                        'NormalFloat',
-                    },
-                },
-            },
-        },
-        enabled = false,
+        'rose-pine/neovim',
+        name = 'rose-pine',
+        enabled = true,
         lazy = false,
         priority = 1000,
         config = function()
-            vim.cmd('colorscheme arctic')
+            require('rose-pine').setup({
+                disable_background = true,
+                disable_float_background = true,
+            })
+            vim.cmd.colorscheme('rose-pine')
+
+            local hl = vim.api.nvim_set_hl
+            hl(0, 'Constant', { fg = '#bc9493' })
+            hl(0, 'String', { fg = '#bc9493' })
+            hl(0, 'Number', { fg = '#bc9493' })
+            hl(0, 'Identifier', { fg = '#cab0af' })
+            -- hl(0, 'Keyword', { fg = '#515e58' })
         end,
     },
     {
         'rebelot/kanagawa.nvim',
-        enabled = true,
+        enabled = false,
         lazy = false,
         priority = 1000,
         config = function()
