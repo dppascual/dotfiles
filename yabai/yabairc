@@ -60,7 +60,7 @@ yabai -m config focus_follows_mouse          off
 #
 #####
 
-yabai -m space 1 --label main
+yabai -m space 1 --label main --layout float
 yabai -m space 2 --label term
 yabai -m space 3 --label browser_work
 yabai -m space 4 --label browser --layout stack
