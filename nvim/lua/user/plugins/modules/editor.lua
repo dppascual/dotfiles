@@ -1,84 +1,37 @@
+local Util = require('user.util')
+
 return {
     -- File explorer
     --
     {
-        'echasnovski/mini.files',
+        'stevearc/oil.nvim',
+        dependencies = { 'nvim-tree/nvim-web-devicons' },
         opts = {
-            windows = {
-                preview = false,
-                width_focus = 30,
-                width_preview = 30,
+            win_options = {
+                concealcursor = 'nvc',
             },
-            options = {
-                use_as_default_explorer = true,
+            keymaps = {
+                ['l'] = 'actions.select',
+                ['h'] = 'actions.parent',
+                ['q'] = 'actions.close',
             },
         },
         keys = {
             {
-                '<leader>fm',
+                '-',
                 function()
-                    require('mini.files').open(
-                        vim.api.nvim_buf_get_name(0),
-                        true
-                    )
+                    require('oil').open()
                 end,
-                desc = 'Open mini.files (directory of current file)',
+                { desc = 'Open parent directory' },
             },
             {
-                '<leader>fM',
+                '_',
                 function()
-                    require('mini.files').open(vim.loop.cwd(), true)
+                    require('oil').open(vim.fn.getcwd())
                 end,
-                desc = 'Open mini.files (cwd)',
+                { desc = 'Open current working directory' },
             },
         },
-        config = function(_, opts)
-            require('mini.files').setup(opts)
-
-            local show_dotfiles = true
-            local filter_show = function(fs_entry)
-                return true
-            end
-            local filter_hide = function(fs_entry)
-                return not vim.startswith(fs_entry.name, '.')
-            end
-
-            local toggle_dotfiles = function()
-                show_dotfiles = not show_dotfiles
-                local new_filter = show_dotfiles and filter_show or filter_hide
-                require('mini.files').refresh({
-                    content = { filter = new_filter },
-                })
-            end
-
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'MiniFilesBufferCreate',
-                callback = function(args)
-                    local buf_id = args.data.buf_id
-                    -- Tweak left-hand side of mapping to your liking
-                    vim.keymap.set(
-                        'n',
-                        'g.',
-                        toggle_dotfiles,
-                        { buffer = buf_id }
-                    )
-                end,
-            })
-
-            vim.api.nvim_create_autocmd('User', {
-                pattern = 'MiniFilesWindowOpen',
-                callback = function(args)
-                    local win_id = args.data.win_id
-
-                    -- Customize window-local settings
-                    vim.wo[win_id].winblend = 0
-                    vim.api.nvim_win_set_config(
-                        win_id,
-                        { border = CUSTOM_BORDER }
-                    )
-                end,
-            })
-        end,
     },
 
     -- Fuzzy Finder
@@ -91,10 +44,105 @@ return {
             'nvim-lua/plenary.nvim',
             'nvim-treesitter/nvim-treesitter',
             'nvim-tree/nvim-web-devicons',
+            'debugloop/telescope-undo.nvim',
+            'theprimeagen/harpoon',
         },
-        config = function()
-            local actions = require('telescope.actions')
-            local action_layout = require('telescope.actions.layout')
+        keys = {
+            -- general
+            {
+                '<leader>?',
+                '<cmd>Telescope builtin<cr>',
+                desc = '[?] Built-in',
+            },
+            {
+                '<leader>:',
+                '<cmd>Telescope commands<cr>',
+                desc = '[:] Commands',
+            },
+
+            -- buffers
+            { '<leader>b', '<cmd>Telescope buffers<cr>', desc = '[B]uffers' },
+            {
+                '<leader>sb',
+                '<cmd>Telescope current_buffer_fuzzy_find<cr>',
+                desc = 'Fuzzily [S]earch in current [B]uffer',
+            },
+
+            -- files
+            {
+                '<leader>ff',
+                Util.telescope('files'),
+                desc = '[F]ind [F]iles (root dir)',
+            },
+            {
+                '<leader>fF',
+                Util.telescope('files', { cwd = vim.fn.expand('%:p:h') }),
+                desc = '[F]ind [F]iles (cwd)',
+            },
+            {
+                '<leader>fr',
+                '<cmd>Telescope oldfiles<cr>',
+                desc = '[F]iles [R]ecent',
+            },
+            {
+                '<leader>sf',
+                Util.telescope('live_grep'),
+                desc = '[S]earch in [F]iles (root dir)',
+            },
+            {
+                '<leader>sF',
+                Util.telescope('live_grep', { cwd = vim.fn.expand('%:p:h') }),
+                desc = '[S]earch in [F]iles (cwd)',
+            },
+
+            -- git
+            {
+                '<leader>gc',
+                '<cmd>Telescope git_commits<CR>',
+                desc = '[G]it [C]ommits',
+            },
+            {
+                '<leader>gb',
+                '<cmd>Telescope git_branches<CR>',
+                desc = '[G]it [B]ranches',
+            },
+
+            -- workflow
+            {
+                '<leader>m',
+                '<cmd>Telescope harpoon marks<cr>',
+                desc = 'Jump to Mark',
+            },
+
+            -- search
+            {
+                '<leader>*',
+                Util.telescope('grep_string', { word_match = '-w' }),
+                desc = 'Search current Word (root dir)',
+            },
+            {
+                '<leader>*',
+                Util.telescope('grep_string'),
+                mode = 'v',
+                desc = 'Search current Selection (root dir)',
+            },
+
+            -- diagnostics
+            {
+                '<leader>xd',
+                '<cmd>Telescope diagnostics bufnr=0<cr>',
+                desc = '[D]ocument [D]iagnostics',
+            },
+            {
+                '<leader>xw',
+                '<cmd>Telescope diagnostics<cr>',
+                desc = '[W]orkspace [D]iagnostics',
+            },
+
+            -- undo
+            { '<leader>u', '<cmd>Telescope undo<cr>', desc = '[Undo] tree' },
+        },
+        config = function(_, opts)
             require('telescope').setup({
                 defaults = {
                     initial_mode = 'insert',
@@ -109,12 +157,12 @@ return {
                     },
                     mappings = {
                         n = {
-                            ['<c-p>'] = action_layout.toggle_preview,
+                            ['<c-p>'] = require('telescope.actions.layout').toggle_preview,
                         },
                         i = {
-                            ['<c-p>'] = action_layout.toggle_preview,
-                            ['<c-q>'] = actions.smart_send_to_qflist
-                                + actions.open_qflist,
+                            ['<c-p>'] = require('telescope.actions.layout').toggle_preview,
+                            ['<c-q>'] = require('telescope.actions').smart_send_to_qflist
+                                + require('telescope.actions').open_qflist,
                         },
                     },
                 },
@@ -131,87 +179,8 @@ return {
             -- To get fzf loaded and working with telescope, you need to call
             -- load_extension, somewhere after setup function:
             require('telescope').load_extension('fzf')
-
-            local function keymapFn(lhs, rhs, opts)
-                opts = opts or {}
-                vim.keymap.set(
-                    opts.mode or 'n',
-                    lhs,
-                    type(rhs) == 'string' and ('<cmd>%s<cr>'):format(rhs) or rhs,
-                    {
-                        noremap = true,
-                        silent = true,
-                        expr = opts.expr,
-                        desc = opts.desc,
-                    }
-                )
-            end
-
-            local builtin = require('telescope.builtin')
-            -- Keymaps
-            --
-            keymapFn('<leader>?', builtin.builtin, { desc = '[?] Built-in' })
-            keymapFn(
-                '<leader>:',
-                builtin.commands,
-                { desc = '[:] User Commands' }
-            )
-
-            -- Buffers
-            --
-            keymapFn('<leader>b', builtin.buffers, { desc = '[B]uffers' })
-            keymapFn(
-                '<leader>sb',
-                builtin.current_buffer_fuzzy_find,
-                { desc = 'Fuzzily [S]earch in current [B]uffer' }
-            )
-
-            -- Files
-            --
-            keymapFn(
-                '<leader>ff',
-                builtin.find_files,
-                { desc = '[F]ind [F]iles' }
-            )
-            keymapFn(
-                '<leader>sf',
-                builtin.live_grep,
-                { desc = '[S]earch in [F]iles' }
-            )
-
-            -- Search
-            --
-            keymapFn(
-                '<leader>*',
-                builtin.grep_string,
-                { desc = '[S]earch current [W]ord' }
-            )
-
-            -- Git
-            --
-            keymapFn(
-                '<leader>gf',
-                builtin.git_files,
-                { desc = '[G]it [F]iles' }
-            )
-            keymapFn(
-                '<leader>gb',
-                builtin.git_branches,
-                { desc = '[G]it [B]ranches' }
-            )
-
-            -- Diagnostic
-            --
-            keymapFn(
-                '<leader>d',
-                "lua require('telescope.builtin').diagnostics( { bufnr = 0 } )",
-                { desc = 'Document [d]iagnostics' }
-            )
-            keymapFn(
-                '<leader>D',
-                builtin.diagnostics,
-                { desc = 'Workspace [D]iagnostics' }
-            )
+            require('telescope').load_extension('undo')
+            require('telescope').load_extension('harpoon')
         end,
     },
 
@@ -224,8 +193,6 @@ return {
             local ui = require('harpoon.ui')
 
             vim.keymap.set('n', '<leader>a', mark.add_file)
-            vim.keymap.set('n', '<C-e>', ui.toggle_quick_menu)
-
             vim.keymap.set('n', '<leader>1', function()
                 ui.nav_file(1)
             end)
@@ -237,6 +204,24 @@ return {
             end)
             vim.keymap.set('n', '<leader>4', function()
                 ui.nav_file(4)
+            end)
+            vim.keymap.set('n', '<leader>5', function()
+                ui.nav_file(5)
+            end)
+            vim.keymap.set('n', '<leader>6', function()
+                ui.nav_file(6)
+            end)
+            vim.keymap.set('n', '<leader>7', function()
+                ui.nav_file(7)
+            end)
+            vim.keymap.set('n', '<leader>8', function()
+                ui.nav_file(8)
+            end)
+            vim.keymap.set('n', '<leader>9', function()
+                ui.nav_file(9)
+            end)
+            vim.keymap.set('n', '<leader>0', function()
+                ui.nav_file(0)
             end)
         end,
     },
@@ -269,13 +254,22 @@ return {
                         },
                         click = 'v:lua.ScSa',
                     },
-                    {
-                        text = { builtin.foldfunc },
-                        click = 'v:lua.ScFa',
-                    },
+                    { text = { builtin.foldfunc, ' ' }, click = 'v:lua.ScFa' },
                 },
             })
         end,
+    },
+
+    -- Indent Highlight
+    --
+    {
+        'shellRaining/hlchunk.nvim',
+        event = { 'UIEnter' },
+        opts = {
+            indent = { enable = false },
+            line_num = { enable = false },
+            blank = { enable = false },
+        },
     },
 
     -- TODO Comments
@@ -482,6 +476,15 @@ return {
             'DiffviewOpen',
             'DiffviewFileHistory',
         },
+        -- config = function()
+        --     local group = vim.api.nvim_create_augroup("Diffview", { clear = true })
+        --     vim.api.nvim_create_autocmd('DiffviewViewOpened', {
+        --         group = group,
+        --         callback = function(ev)
+        --            require('hlchunk.mods.chunk'):disable()
+        --         end,
+        --     })
+        -- end
     },
 
     -- testing framework

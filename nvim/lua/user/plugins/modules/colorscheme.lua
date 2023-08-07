@@ -1,23 +1,39 @@
 return {
     {
+        'mcchrish/zenbones.nvim',
+        dependencies = {
+            'rktjmp/lush.nvim',
+            {
+                'xiyaowong/transparent.nvim',
+                opts = {
+                    extra_groups = {
+                        'NormalFloat', -- plugins which have float panel such as Lazy, Mason, LspInfo
+                    },
+                },
+            },
+        },
+        enabled = false,
+        lazy = false,
+        priority = 1000,
+        config = function()
+            vim.cmd.colorscheme('rosebones')
+        end,
+    },
+    {
         'rose-pine/neovim',
         name = 'rose-pine',
         enabled = true,
         lazy = false,
         priority = 1000,
-        config = function()
-            require('rose-pine').setup({
-                disable_background = true,
-                disable_float_background = true,
-            })
-            vim.cmd.colorscheme('rose-pine')
+        opts = {
+            disable_background = true,
+            disable_float_background = true,
+        },
+        config = function(_, opts)
+            require('rose-pine').setup(opts)
 
-            local hl = vim.api.nvim_set_hl
-            hl(0, 'Constant', { fg = '#bc9493' })
-            hl(0, 'String', { fg = '#bc9493' })
-            hl(0, 'Number', { fg = '#bc9493' })
-            hl(0, 'Identifier', { fg = '#cab0af' })
-            -- hl(0, 'Keyword', { fg = '#515e58' })
+            vim.cmd('colorscheme rose-pine')
+            vim.cmd([[highlight TreesitterContextBottom gui=underline guisp=#403d52]])
         end,
     },
     {

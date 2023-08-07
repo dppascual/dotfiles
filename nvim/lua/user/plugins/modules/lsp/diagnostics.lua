@@ -10,7 +10,7 @@ vim.diagnostic.config({
     float = {
         focusable = true,
         style = 'minimal',
-        border = 'rounded',
+        border = CUSTOM_BORDER,
         source = 'always',
         header = '',
         prefix = '',
@@ -29,17 +29,17 @@ local function keymapFn(lhs, rhs, opts)
 end
 
 keymapFn(
-    ']d',
+    ']x',
     'lua vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN }, float = false })',
     { desc = 'Next Diagnostic' }
 )
 keymapFn(
-    '[d',
+    '[x',
     'lua vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.WARN }, float = false })',
     { desc = 'Prev Diagnostic' }
 )
 keymapFn(
-    '<leader>l',
+    '<leader>xl',
     require('lsp_lines').toggle,
     { desc = 'Toggle lsp_lines' }
 )

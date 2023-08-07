@@ -13,25 +13,6 @@ return {
         end,
     },
 
-    -- Add golang tools to mason
-    {
-        'jose-elias-alvarez/null-ls.nvim',
-        opts = function(_, opts)
-            local nls = require('null-ls')
-            opts.sources = opts.sources or {}
-            vim.list_extend(opts.sources, {
-                nls.builtins.formatting.goimports_reviser,
-            })
-        end,
-        dependencies = {
-            'mason.nvim',
-            opts = function(_, opts)
-                opts.ensure_installed = opts.ensure_installed or {}
-                vim.list_extend(opts.ensure_installed, { 'goimports-reviser' })
-            end,
-        },
-    },
-
     -- Correctly setup lspconfig for yaml
     --
     {
@@ -49,6 +30,7 @@ return {
                                 unusedparams = true,
                                 unusedwrite = true,
                                 useany = true,
+                                deprecated = true,
                             },
                             codelenses = {
                                 gc_details = false,
@@ -82,14 +64,17 @@ return {
                 gopls = function(_, opts)
                     -- workaround for gopls not supporting semanticTokensProvider
                     -- https://github.com/golang/go/issues/54531#issuecomment-1464982242
-                    require('user.util').on_attach(function(client, _)
-                        if client.name == 'gopls' then
-                            if
-                                not client.server_capabilities.semanticTokensProvider
-                            then
-                                local semantic =
+                    -- stylua: ignore
+                    vim.api.nvim_create_autocmd("LspAttach", {
+                        callback = function(ev)
+                            local client = vim.lsp.get_client_by_id(ev.data.client_id)
+                            if client.name == 'gopls' then
+                                if
+                                    not client.server_capabilities.semanticTokensProvider
+                                then
+                                    local semantic =
                                     client.config.capabilities.textDocument.semanticTokens
-                                client.server_capabilities.semanticTokensProvider =
+                                    client.server_capabilities.semanticTokensProvider =
                                     {
                                         full = true,
                                         legend = {
@@ -98,10 +83,43 @@ return {
                                         },
                                         range = true,
                                     }
+                                end
                             end
                         end
-                    end)
-                    -- end workaround
+                    })-- end workaround
+
+                    -- Run gofmt/gofumpt, import packages automatically on save
+                    -- stylua: ignore
+                    vim.api.nvim_create_autocmd('BufWritePre', {
+                        group = vim.api.nvim_create_augroup( 'GoFormatting', { clear = true }
+                        ),
+                        pattern = '*.go',
+                        callback = function()
+                            local params = vim.lsp.util.make_range_params()
+                            params.context =
+                                { only = { 'source.organizeImports' } }
+                            local result = vim.lsp.buf_request_sync(
+                                0,
+                                'textDocument/codeAction',
+                                params,
+                                2000
+                            )
+                            for _, res in pairs(result or {}) do
+                                for _, r in pairs(res.result or {}) do
+                                    if r.edit then
+                                        vim.lsp.util.apply_workspace_edit(
+                                            r.edit,
+                                            'utf-16'
+                                        )
+                                    else
+                                        vim.lsp.buf.execute_command(r.command)
+                                    end
+                                end
+                            end
+
+                            vim.lsp.buf.format()
+                        end,
+                    })
                 end,
             },
         },

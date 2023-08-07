@@ -3,25 +3,6 @@ local M = {}
 M.on_attach = function(client, bufnr)
     local group = vim.api.nvim_create_augroup('LSP', { clear = true })
 
-    -- Enable inlay-hints
-    --
-    if client.server_capabilities.inlayHintProvider then
-        vim.api.nvim_create_autocmd('InsertEnter', {
-            buffer = bufnr,
-            callback = function()
-                vim.lsp.inlay_hint(bufnr, false)
-            end,
-            group = 'LSP',
-        })
-        vim.api.nvim_create_autocmd({ 'BufReadPre', 'InsertLeave' }, {
-            buffer = bufnr,
-            callback = function()
-                vim.lsp.inlay_hint(bufnr, true)
-            end,
-            group = 'LSP',
-        })
-    end
-
     -- Keymaps
     --
     local function keymapFn(lhs, rhs, opts)
@@ -61,22 +42,22 @@ M.on_attach = function(client, bufnr)
     keymapFn(
         '<leader>ds',
         "lua require'telescope.builtin'.lsp_document_symbols()",
-        { desc = 'Document [S]ymbols' }
+        { desc = '[D]ocument [S]ymbols' }
     )
     keymapFn(
         '<leader>ws',
         "lua require'telescope.builtin'.lsp_dynamic_workspace_symbols()",
-        { desc = 'Workspace [S]ymbols' }
+        { desc = '[W]orkspace [S]ymbols' }
     )
 
-    if client.server_capabilities.renameProvider then
+    if client.supports_method('textDocument/rename') then
         keymapFn('<leader>r', vim.lsp.buf.rename, { desc = '[R]ename' })
     end
 
-    if client.server_capabilities.codeActionProvider then
+    if client.supports_method('textDocument/codeAction') then
         keymapFn(
             '<leader>ca',
-            vim.lsp.buf.code_action,
+            ':CodeActionMenu',
             { desc = 'Code [A]ction', mode = { 'n', 'v' } }
         )
 
@@ -116,8 +97,8 @@ M.on_attach = function(client, bufnr)
             buffer = bufnr,
             callback = function()
                 vim.lsp.buf.format({
-                    filter = function(cli)
-                        return cli.name ~= 'sumneko_lua'
+                    filter = function(clt)
+                        return clt.name == 'null-ls'
                     end,
                     bufnr = bufnr,
                 })
@@ -126,17 +107,19 @@ M.on_attach = function(client, bufnr)
         })
     end
 
-    if client.server_capabilities.documentRangeFormattingProvider then
-        keymapFn(
-            'gq',
-            vim.lsp.buf.format,
-            { mode = 'v', desc = '[gq] Format Range' }
-        )
-    end
+    -- formatexpr is automatically (when LSP attached to a buffer) assigned to
+    -- vim.lsp.formatexpr which, in turn, makes use of vim.lsb.buf.format.
+    -- if client.server_capabilities.documentRangeFormattingProvider then
+    --     keymapFn(
+    --         'gq',
+    --         vim.lsp.buf.format,
+    --         { mode = 'v', desc = '[gq] Format Range' }
+    --     )
+    -- end
 
     -- CodeLens
     --
-    if client.server_capabilities.codeLensProvider then
+    if client.supports_method('textDocument/codeLens') then
         keymapFn(
             '<leader>cl',
             vim.lsp.codelens.run,
@@ -165,7 +148,7 @@ M.on_attach = function(client, bufnr)
 
     -- DocumentHighlight
     --
-    if client.server_capabilities.documentHighlightProvider then
+    if client.supports_method('textDocument/documentHighlight') then
         vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
             buffer = bufnr,
             callback = function()

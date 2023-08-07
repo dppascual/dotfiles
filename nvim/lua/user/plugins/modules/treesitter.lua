@@ -27,7 +27,7 @@ return {
         },
         opts = {
             ---@type table - filled up by each language module
-            ensure_installed = {},
+            ensure_installed = { 'lua' },
             highlight = {
                 enable = true,
                 -- Disable slow treesitter highlight for large files

@@ -10,6 +10,10 @@ return {
             'williamboman/mason-lspconfig.nvim',
             'jose-elias-alvarez/null-ls.nvim',
             {
+                'folke/neodev.nvim',
+                opts = {},
+            },
+            {
                 'hrsh7th/cmp-nvim-lsp',
                 cond = function()
                     return require('lazy.core.config').spec.plugins['nvim-cmp']
@@ -53,6 +57,21 @@ return {
                 },
             },
             { 'https://git.sr.ht/~whynothugo/lsp_lines.nvim', opts = {} },
+            -- {
+            --     'kosayoda/nvim-lightbulb',
+            --     opts = {
+            --         sign = { enabled = false },
+            --         virtual_text = { enabled = true, text = '' },
+            --         autocmd = { enabled = true },
+            --     },
+            -- },
+            {
+                'weilbith/nvim-code-action-menu',
+                cmd = 'CodeActionMenu',
+                config = function()
+                    vim.g.code_action_menu_window_border = CUSTOM_BORDER
+                end,
+            },
 
             -- Tools
         },
@@ -79,12 +98,35 @@ return {
 
             -- Keymaps
             --
-            require('user.util').on_attach(function(client, buffer)
-                require('user.plugins.modules.lsp.keymaps').on_attach(
-                    client,
-                    buffer
-                )
-            end)
+            vim.api.nvim_create_autocmd('LspAttach', {
+                callback = function(ev)
+                    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+                    require('user.plugins.modules.lsp.keymaps').on_attach(
+                        client,
+                        ev.buf
+                    )
+                end,
+            })
+
+            -- Inlay hints
+            --
+            vim.api.nvim_create_autocmd('LspAttach', {
+                callback = function(ev)
+                    local client = vim.lsp.get_client_by_id(ev.data.client_id)
+
+                    if
+                        client
+                        and client.supports_method('textDocument/inlayHint')
+                    then
+                        vim.keymap.set({ 'n', 'v' }, '<leader>h', function()
+                            vim.lsp.inlay_hint(ev.buf, nil)
+                        end, {
+                            noremap = true,
+                            silent = true,
+                        })
+                    end
+                end,
+            })
 
             -- Lspconfig
             --
@@ -132,20 +174,6 @@ return {
                 ensure_installed = ensure_installed,
                 handlers = { setup },
             })
-
-            -- LSP clients started up with lspconfig
-            -- require('mason-lspconfig').setup_handlers({
-            --     function(server_name)
-            --         -- rust-analyzer is installed by using rustup
-            --         require('lspconfig')[server_name].setup({
-            --             capabilities = capabilities,
-            --             settings = servers[server_name],
-            --             flags = {
-            --                 debounce_text_changes = 150,
-            --             },
-            --         })
-            --     end,
-            -- })
 
             -- Hover configuration
             --

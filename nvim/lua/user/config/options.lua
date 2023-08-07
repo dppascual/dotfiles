@@ -24,7 +24,7 @@ vim.opt.cursorline = true
 vim.opt.hlsearch = false
 vim.opt.incsearch = true
 vim.opt.colorcolumn = '80'
-vim.opt.scrolloff = 8
+vim.opt.scrolloff = 4
 -- have a fixed column for the diagnostics to appear in
 -- this removes the jitter when warnings/errors flow in
 vim.wo.signcolumn = 'yes'
@@ -42,6 +42,10 @@ vim.opt.wrap = false
 --
 vim.opt.termguicolors = true
 
+-- [[ Git ]]
+--
+vim.opt.diffopt:append({ 'linematch:50' }) -- Improve diff mode (https://github.com/neovim/neovim/pull/14537)
+
 -- [[ Backup ]]
 --
 vim.opt.swapfile = false
@@ -53,9 +57,3 @@ vim.opt.undodir = vim.fn.stdpath('data') .. '/undodir'
 --
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
--- vim.g.netrw_browse_split = 0
--- vim.g.netrw_winsize = 25
--- vim.g.netrw_banner = 0
--- vim.g.netrw_keepdir = 0 -- Keep the current directory and the browsing directory synced.
--- This helps you avoid the move files error.
--- vim.g.netrw_sort_sequence = [[[\/]$,*]] -- Show directories first (sorting)
