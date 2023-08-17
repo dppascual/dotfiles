@@ -20,6 +20,7 @@ return {
         opts = {
             servers = {
                 gopls = {
+                    cmd = { 'gopls', '-rpc.trace' },
                     settings = {
                         gopls = {
                             usePlaceholders = true,

@@ -57,19 +57,19 @@ return {
                 },
             },
             { 'https://git.sr.ht/~whynothugo/lsp_lines.nvim', opts = {} },
-            -- {
-            --     'kosayoda/nvim-lightbulb',
-            --     opts = {
-            --         sign = { enabled = false },
-            --         virtual_text = { enabled = true, text = '' },
-            --         autocmd = { enabled = true },
-            --     },
-            -- },
+            {
+                'kosayoda/nvim-lightbulb',
+                opts = {
+                    sign = { enabled = true, text = '' },
+                    autocmd = { enabled = true },
+                },
+            },
             {
                 'weilbith/nvim-code-action-menu',
                 cmd = 'CodeActionMenu',
                 config = function()
                     vim.g.code_action_menu_window_border = CUSTOM_BORDER
+                    vim.g.code_action_menu_show_details = false
                 end,
             },
 

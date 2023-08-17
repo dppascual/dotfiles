@@ -47,23 +47,23 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
 -- [[ No Highlight when leave cmdline ]]
 --
-vim.api.nvim_create_autocmd('CmdlineEnter', {
-    callback = function()
-        vim.opt.hlsearch = true
-        vim.opt.incsearch = true
-    end,
-    group = editor_group,
-    pattern = '/,?',
-})
-
-vim.api.nvim_create_autocmd('CmdlineLeave', {
-    callback = function()
-        vim.opt.hlsearch = false
-        vim.opt.incsearch = false
-    end,
-    group = editor_group,
-    pattern = '/,?',
-})
+-- vim.api.nvim_create_autocmd('CmdlineEnter', {
+--     callback = function()
+--         vim.opt.hlsearch = true
+--         vim.opt.incsearch = true
+--     end,
+--     group = editor_group,
+--     pattern = '/,?',
+-- })
+--
+-- vim.api.nvim_create_autocmd('CmdlineLeave', {
+--     callback = function()
+--         vim.opt.hlsearch = false
+--         vim.opt.incsearch = false
+--     end,
+--     group = editor_group,
+--     pattern = '/,?',
+-- })
 
 -- [[ Disable statusline in terminal mode ]]
 --

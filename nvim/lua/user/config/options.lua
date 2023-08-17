@@ -16,7 +16,7 @@ vim.opt.ignorecase = true -- Search case insensitive...
 vim.opt.smartcase = true -- ... but not it begins with upper case
 vim.opt.smartindent = true -- make indenting smarter again
 vim.opt.completeopt = 'menuone,noinsert,noselect' -- Autocomplete options
-vim.opt.updatetime = 50 -- 300ms of no cursor movement to trigger CursorHold
+vim.opt.updatetime = 100 -- 300ms of no cursor movement to trigger CursorHold
 
 vim.opt.laststatus = 3
 vim.opt.cmdheight = 0
@@ -44,7 +44,16 @@ vim.opt.termguicolors = true
 
 -- [[ Git ]]
 --
-vim.opt.diffopt:append({ 'linematch:50' }) -- Improve diff mode (https://github.com/neovim/neovim/pull/14537)
+-- Improve diff mode (https://github.com/neovim/neovim/pull/14537)
+vim.opt.diffopt = table.concat({
+    'algorithm:histogram',
+    'internal',
+    'indent-heuristic',
+    'filler',
+    'closeoff',
+    'vertical',
+    'linematch:100',
+}, ',')
 
 -- [[ Backup ]]
 --

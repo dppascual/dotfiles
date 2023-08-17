@@ -40,13 +40,15 @@ M.on_attach = function(client, bufnr)
         { desc = 'Signature Help', mode = { 'i', 'n' } }
     )
     keymapFn(
-        '<leader>ds',
-        "lua require'telescope.builtin'.lsp_document_symbols()",
+        '<leader>ss',
+        -- "lua require'telescope.builtin'.lsp_document_symbols()",
+        ':FzfLua lsp_document_symbols',
         { desc = '[D]ocument [S]ymbols' }
     )
     keymapFn(
-        '<leader>ws',
-        "lua require'telescope.builtin'.lsp_dynamic_workspace_symbols()",
+        '<leader>sS',
+        -- "lua require'telescope.builtin'.lsp_dynamic_workspace_symbols()",
+        ':FzfLua lsp_live_workspace_symbols',
         { desc = '[W]orkspace [S]ymbols' }
     )
 

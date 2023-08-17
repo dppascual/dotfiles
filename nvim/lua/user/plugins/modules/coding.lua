@@ -76,6 +76,7 @@ return {
             }
 
             local cmp = require('cmp')
+            local defaults = require('cmp.config.default')()
             local luasnip = require('luasnip')
 
             -- select_item detects the order in which elements are shown
@@ -124,7 +125,7 @@ return {
 
                 completion = {
                     completeopt = 'menu,menuone,noinsert',
-                    keyword_length = 2,
+                    -- keyword_length = 2,
                 },
 
                 matching = {
@@ -150,6 +151,7 @@ return {
                         winhighlight = 'NormalFloat:Normal,CursorLine:Visual',
                     },
                 },
+
                 snippet = {
                     expand = function(args)
                         luasnip.lsp_expand(args.body)
@@ -204,10 +206,30 @@ return {
                         end
                     end),
                 }),
+                formatting = {
+                    format = function(entry, item)
+                        item.kind = string.format(
+                            '%s %s',
+                            kind_icons[item.kind],
+                            item.kind
+                        )
+                        item.menu = ({
+                            buffer = '[Buffer]',
+                            path = '[Path]',
+                            nvim_lsp = '[LSP]',
+                            -- nvim_lsp_signature_help = "[Signature]",
+                            luasnip = '[Snip]',
+                            nvim_lua = '[Lua]',
+                        })[entry.source.name]
+
+                        return item
+                    end,
+                },
+
+                sorting = defaults.sorting,
             }
         end,
         config = function(_, opts)
-
             local cmp = require('cmp')
             cmp.setup(opts)
 
