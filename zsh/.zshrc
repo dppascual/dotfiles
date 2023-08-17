@@ -40,7 +40,7 @@ eval "$(zoxide init zsh)"
 ###############
 FD_OPTIONS="--follow --exclude .git"
 export FZF_DEFAULT_COMMAND="git ls-files --cached --others --exclude-standard | fd --type f --type l $FD_OPTIONS"
-export FZF_DEFAULT_OPTS="--no-mouse --height 40% -1 --reverse --multi --inline-info --no-separator --border
+export FZF_DEFAULT_OPTS="--no-mouse --height 40% --reverse --multi --inline-info --no-separator --border
         --preview '[[ \$(file --mime {}) =~ binary ]] && echo {} is a binary file || bat --style=numbers --color=always {} 2> /dev/null | head -300'
         --preview-window 'right:hidden:wrap'
         --bind 'f1:execute(bat --style=numbers --color=always {})'
@@ -51,12 +51,12 @@ export FZF_DEFAULT_OPTS="--no-mouse --height 40% -1 --reverse --multi --inline-i
         --bind 'ctrl-d:preview-half-page-down'
         --bind 'ctrl-a:select-all+accept'
         --bind 'ctrl-y:execute-silent(echo {+} | pbcopy)+abort'"
-        # --color bg+:#425e5e"
 export FZF_CTRL_R_OPTS="--preview 'bat --color=always {}'
             --preview-window down:40%:hidden:wrap
             --bind 'ctrl-/:toggle-preview'"
 export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
-# export FZF_CTRL_T_COMMAND='command cat <(fre --sorted --sort_method frecent) <(fd $FD_OPTIONS)'
+# export FZF_CTRL_T_COMMAND='command cat <(fre --sorted) <(fd $FD_OPTIONS)'
+export FZF_CTRL_T_OPTS='--tiebreak=index'
 export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 
 ###############
