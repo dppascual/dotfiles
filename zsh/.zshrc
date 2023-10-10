@@ -13,7 +13,8 @@ source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ############
 export ZSH_CACHE_DIR="${HOME}/.local/share/oh-my-zsh"
 export CLICOLOR=1
-# export TERM=xterm-256color
+export EDITOR="/usr/local/bin/nvim"
+export TERM=xterm-256color
 export LESS="-R"
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
@@ -25,6 +26,13 @@ export GOPROXY="https://proxy.golang.org,direct"
 export GO111MODULE=on
 export GOMODCACHE="$GOPATH/pkg/mod"
 export PATH="${GOROOT}/bin:${GOPATH}/bin:${HOME}/.cargo/bin:${PATH}"
+
+##################
+###
+### Zk notes
+###
+##################
+export ZK_NOTEBOOK_DIR="${HOME}/projects/personal/notes"
 
 ##################
 ###
@@ -49,14 +57,15 @@ export FZF_DEFAULT_OPTS="--no-mouse --height 40% --reverse --multi --inline-info
         --bind 'alt-j:preview-down'
         --bind 'ctrl-u:preview-half-page-up'
         --bind 'ctrl-d:preview-half-page-down'
-        --bind 'ctrl-a:select-all+accept'
-        --bind 'ctrl-y:execute-silent(echo {+} | pbcopy)+abort'"
+        --bind 'alt-a:select-all+accept'
+        --bind 'ctrl-y:execute-silent(echo {+} | pbcopy)+abort'
+        --color=gutter:-1"
 export FZF_CTRL_R_OPTS="--preview 'bat --color=always {}'
             --preview-window down:40%:hidden:wrap
             --bind 'ctrl-/:toggle-preview'"
 export FZF_CTRL_T_COMMAND="fd $FD_OPTIONS"
 # export FZF_CTRL_T_COMMAND='command cat <(fre --sorted) <(fd $FD_OPTIONS)'
-export FZF_CTRL_T_OPTS='--tiebreak=index'
+export FZF_CTRL_T_OPTS="--tiebreak=index"
 export FZF_ALT_C_COMMAND="fd --type d $FD_OPTIONS"
 
 ###############
@@ -114,6 +123,7 @@ alias ofv='sudo openfortivpn -c /opt/vpnaas/config'
 alias pf='fzf --preview='\''/usr/local/bin/bat --color=always --style=numbers {}'\'' --bind shift-up:preview-page-up,shift-down:preview-page-down'
 alias ls=/usr/local/bin/exa
 
+gd() { /usr/local/bin/nvim -c "DiffviewOpen $@"; }
 
 #####
 #
