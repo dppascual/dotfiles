@@ -45,6 +45,16 @@ vim.api.nvim_create_autocmd('BufWritePre', {
     pattern = '*',
 })
 
+-- [[ Open Oil.nvim when no file is selected on startup]]
+--
+vim.api.nvim_create_autocmd('VimEnter', {
+    callback = function()
+        if vim.fn.argv(0) == '' then
+            require('fzf-lua').files()
+        end
+    end,
+})
+
 -- [[ No Highlight when leave cmdline ]]
 --
 -- vim.api.nvim_create_autocmd('CmdlineEnter', {
