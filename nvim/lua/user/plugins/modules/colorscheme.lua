@@ -2,7 +2,7 @@ return {
     {
         'rose-pine/neovim',
         name = 'rose-pine',
-        enabled = true,
+        enabled = false,
         lazy = false,
         priority = 1000,
         opts = {
@@ -12,10 +12,7 @@ return {
                 git_change = 'gold',
             },
             highlight_groups = {
-                TreesitterContextBottom = {
-                    sp = 'highlight_med',
-                    underline = true,
-                },
+                TreesitterContextBottom = { fg = '#1f1d2e', underline = true },
                 GitSignsAdd = { bg = 'none' },
                 GitSignsChange = { bg = 'none' },
                 GitSignsDelete = { bg = 'none' },
@@ -23,13 +20,15 @@ return {
         },
         config = function(_, opts)
             require('rose-pine').setup(opts)
-
             vim.cmd('colorscheme rose-pine')
+            vim.cmd([[highlight DiffAdd guibg='#2b3328']])
+            vim.cmd([[highlight DiffDelete guifg='#c34043' guibg='#432426']])
+            vim.cmd([[highlight DiffChange guibg='#252535']])
         end,
     },
     {
         'rebelot/kanagawa.nvim',
-        enabled = false,
+        enabled = true,
         lazy = false,
         priority = 1000,
         config = function()
@@ -42,7 +41,9 @@ return {
                     theme = {
                         all = {
                             ui = {
-                                bg_gutter = 'none',
+                                float = {
+                                    bg = 'none',
+                                },
                             },
                         },
                     },
@@ -64,6 +65,11 @@ return {
 
                         -- Popular plugins that open floats will link to NormalFloat by default;
                         -- set their background accordingly if you wish to keep them dark and borderless
+                        FzfLuaBorder = {
+                            bg = 'none',
+                            fg = theme.ui.bg_p1,
+                        },
+
                         LazyNormal = {
                             bg = 'none',
                             fg = theme.ui.fg_dim,
@@ -84,7 +90,7 @@ return {
                 end,
                 background = {
                     -- map the value of 'background' option to a theme
-                    dark = 'dragon', -- try "dragon" !
+                    dark = 'wave', -- try "dragon" !
                     light = 'lotus',
                 },
             })
