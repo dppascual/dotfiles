@@ -11,7 +11,7 @@ vim.diagnostic.config({
         focusable = true,
         style = 'minimal',
         border = CUSTOM_BORDER,
-        source = 'always',
+        source = 'if_many',
         header = '',
         prefix = '',
     },
@@ -28,24 +28,21 @@ local function keymapFn(lhs, rhs, opts)
     )
 end
 
-keymapFn(
-    ']x',
-    'lua vim.diagnostic.goto_next({ severity = { min = vim.diagnostic.severity.WARN }, float = false })',
-    { desc = 'Next Diagnostic' }
-)
-keymapFn(
-    '[x',
-    'lua vim.diagnostic.goto_prev({ severity = { min = vim.diagnostic.severity.WARN }, float = false })',
-    { desc = 'Prev Diagnostic' }
-)
-keymapFn(
-    '<leader>xl',
-    require('lsp_lines').toggle,
-    { desc = 'Toggle lsp_lines' }
-)
+-- stylua: ignore start
+keymapFn( ']d', vim.diagnostic.goto_next, { desc = 'Next Diagnostic' })
+keymapFn( '[d', vim.diagnostic.goto_prev, { desc = 'Prev Diagnostic' })
+keymapFn( ']e', 'lua vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR })', { desc = 'Next Error' })
+keymapFn( '[e', 'lua vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR })', { desc = 'Prev Error' })
+-- keymapFn(
+--     '<leader>xl',
+--     require('lsp_lines').toggle,
+--     { desc = 'Toggle lsp_lines' }
+-- )
 
--- Diagnostic autocmd
+-- Diagnostic keymap
+keymapFn( '<leader>cd', 'lua vim.diagnostic.open_float(nil, { focusable = true })', { desc = 'Open float diagnostic' })
 -- vim.api.nvim_create_autocmd('CursorHold', {
 --     pattern = { '*' },
 --     command = 'lua vim.diagnostic.open_float(nil, { focusable = false })',
 -- })
+-- stylua: ignore end

@@ -24,6 +24,7 @@ return {
     --
     {
         'hrsh7th/nvim-cmp',
+        commit = '6c84bc75c64f778e9f1dcb798ed41c7fcb93b639',
         event = { 'BufReadPre', 'BufNewFile' },
         dependencies = {
             'hrsh7th/cmp-nvim-lsp',
@@ -73,6 +74,7 @@ return {
                 Watch = ' ',
                 Package = '',
                 Copilot = ' ',
+                Codeium = ' ',
             }
 
             local cmp = require('cmp')
@@ -169,7 +171,6 @@ return {
                             buffer = '[Buffer]',
                             path = '[Path]',
                             nvim_lsp = '[LSP]',
-                            -- nvim_lsp_signature_help = "[Signature]",
                             luasnip = '[Snip]',
                             nvim_lua = '[Lua]',
                         })[entry.source.name]
@@ -188,7 +189,7 @@ return {
                     ['<C-Space>'] = cmp.mapping.complete(),
                     ['<C-e>'] = cmp.mapping.close(),
                     ['<CR>'] = cmp.mapping.confirm({
-                        behavior = cmp.ConfirmBehavior.Insert,
+                        -- behavior = cmp.ConfirmBehavior.Replace,
                         select = true,
                     }),
                     ['<Tab>'] = cmp.mapping(function(fallback)
@@ -206,25 +207,6 @@ return {
                         end
                     end),
                 }),
-                formatting = {
-                    format = function(entry, item)
-                        item.kind = string.format(
-                            '%s %s',
-                            kind_icons[item.kind],
-                            item.kind
-                        )
-                        item.menu = ({
-                            buffer = '[Buffer]',
-                            path = '[Path]',
-                            nvim_lsp = '[LSP]',
-                            -- nvim_lsp_signature_help = "[Signature]",
-                            luasnip = '[Snip]',
-                            nvim_lua = '[Lua]',
-                        })[entry.source.name]
-
-                        return item
-                    end,
-                },
 
                 sorting = defaults.sorting,
             }
@@ -316,6 +298,135 @@ return {
             end
 
             vim.opt.completeopt = { 'menu', 'menuone', 'noselect' }
+        end,
+    },
+
+    -- Formatting
+    --
+    {
+        'stevearc/conform.nvim',
+        event = { 'BufReadPre', 'BufNewFile' },
+        dependencies = { 'mason.nvim' },
+        keys = {
+            {
+                '<leader>cF',
+                function()
+                    require('conform').format({ formatters = { 'injected' } })
+                end,
+                mode = { 'n', 'v' },
+                desc = 'Format Injected Langs',
+            },
+        },
+        init = function()
+            -- formatexpr is automatically (when LSP attached to a buffer) assigned to
+            -- vim.lsp.formatexpr which, in turn, makes use of vim.lsb.buf.format.
+            -- It overwrites formatexpr option to use conform.
+            vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
+        end,
+        opts = {
+            ---@type table<string,table>
+            formatters = {
+                injected = { options = { ignore_errors = true } },
+            },
+            format_on_save = {
+                -- These options will be passed to conform.format()
+                timeout_ms = 500,
+                lsp_fallback = true,
+            },
+        },
+        config = function(_, opts)
+            opts.formatters = opts.formatters or {}
+            for name, formatter in pairs(opts.formatters) do
+                if type(formatter) == 'table' then
+                    local ok, defaults =
+                        pcall(require, 'conform.formatters.' .. name)
+                    if ok and type(defaults) == 'table' then
+                        opts.formatters[name] = vim.tbl_deep_extend(
+                            'force',
+                            {},
+                            defaults,
+                            formatter
+                        )
+                    end
+                end
+            end
+            require('conform').setup(opts)
+        end,
+    },
+
+    -- Linting
+    --
+    {
+        'mfussenegger/nvim-lint',
+        event = 'VeryLazy',
+        opts = {
+            -- Event to trigger linters
+            events = { 'BufWritePost', 'BufReadPost', 'InsertLeave' },
+            linters_by_ft = {},
+            ---@type table<string,table>
+            linters = {
+                -- -- Example of using selene only when a selene.toml file is present
+                -- selene = {
+                --   -- `condition` is another extension that allows you to
+                --   -- dynamically enable/disable linters based on the context.
+                --   condition = function(ctx)
+                --     return vim.fs.find({ "selene.toml" }, { path = ctx.filename, upward = true })[1]
+                --   end,
+                -- },
+            },
+        },
+        config = function(_, opts)
+            local M = {}
+
+            local lint = require('lint')
+            for name, linter in pairs(opts.linters) do
+                if
+                    type(linter) == 'table'
+                    and type(lint.linters) == 'table'
+                then
+                    lint.linters[name] =
+                        vim.tbl_deep_extend('force', lint.linters[name], linter)
+                end
+            end
+            lint.linters_by_ft = opts.linters_by_ft
+
+            function M.debounce(ms, fn)
+                local timer = vim.loop.new_timer()
+                return function(...)
+                    local argv = { ... }
+                    timer:start(ms, 0, function()
+                        timer:stop()
+                        vim.schedule_wrap(fn)(unpack(argv))
+                    end)
+                end
+            end
+
+            function M.lint()
+                local names = lint.linters_by_ft[vim.bo.filetype] or {}
+                local ctx = { filename = vim.api.nvim_buf_get_name(0) }
+                ctx.dirname = vim.fn.fnamemodify(ctx.filename, ':h')
+                names = vim.tbl_filter(function(name)
+                    local linter = lint.linters[name]
+                    return linter
+                        and not (
+                            type(linter) == 'table'
+                            and linter.condition
+                            and not linter.condition(ctx)
+                        )
+                end, names)
+
+                if #names > 0 then
+                    lint.try_lint(names)
+                end
+            end
+
+            vim.api.nvim_create_autocmd(opts.events, {
+                group = vim.api.nvim_create_augroup(
+                    'nvim-lint',
+                    { clear = true }
+                ),
+                callback = M.debounce(100, M.lint),
+            })
         end,
     },
 

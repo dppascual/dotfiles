@@ -8,7 +8,6 @@ return {
             -- LSP
             'mason.nvim',
             'williamboman/mason-lspconfig.nvim',
-            'jose-elias-alvarez/null-ls.nvim',
             {
                 'folke/neodev.nvim',
                 opts = {},
@@ -56,7 +55,6 @@ return {
                     },
                 },
             },
-            { 'https://git.sr.ht/~whynothugo/lsp_lines.nvim', opts = {} },
             {
                 'kosayoda/nvim-lightbulb',
                 opts = {
@@ -114,25 +112,64 @@ return {
                 callback = function(ev)
                     local client = vim.lsp.get_client_by_id(ev.data.client_id)
 
-                    if
-                        client
-                        and client.supports_method('textDocument/inlayHint')
-                    then
-                        vim.keymap.set({ 'n', 'v' }, '<leader>h', function()
-                            vim.lsp.inlay_hint(ev.buf, nil)
-                        end, {
-                            noremap = true,
-                            silent = true,
+                    -- stylua: ignore start
+                    if client and client.supports_method('textDocument/inlayHint') then
+                        local inlay_hints_group = vim.api.nvim_create_augroup('InlayHints', { clear = false })
+
+                        -- Initial inlay hint display.
+                        local mode = vim.api.nvim_get_mode().mode
+                        vim.lsp.inlay_hint(ev.buf, mode == 'n' or mode == 'v')
+
+                        vim.api.nvim_create_autocmd('InsertEnter', {
+                            group = inlay_hints_group,
+                            desc = "Enable inlay hints",
+                            buffer = ev.buf,
+                            callback = function()
+                                vim.lsp.inlay_hint(ev.buf, false)
+                            end,
                         })
+                        vim.api.nvim_create_autocmd('InsertLeave', {
+                            group = inlay_hints_group,
+                            desc = "Disable inlay hints",
+                            buffer = ev.buf,
+                            callback = function()
+                                vim.lsp.inlay_hint(ev.buf, true)
+                            end,
+                        })
+                        -- vim.keymap.set({ 'n', 'v' }, '<leader>i', function()
+                        --     vim.lsp.inlay_hint(ev.buf, nil)
+                        -- end, {
+                        --     noremap = true,
+                        --     silent = true,
+                        -- })
                     end
+                    -- stylua: ignore end
                 end,
             })
 
             -- Lspconfig
             --
             local servers = opts.servers ---@type table<string, table>
-            local capabilities = require('cmp_nvim_lsp').default_capabilities(
-                vim.lsp.protocol.make_client_capabilities()
+            local capabilities = vim.tbl_deep_extend(
+                'force',
+                vim.lsp.protocol.make_client_capabilities(),
+                require('cmp_nvim_lsp').default_capabilities(),
+                {
+                    workspace = {
+                        -- PERF: didChangeWatchedFiles is too slow.
+                        -- TODO: Remove this when https://github.com/neovim/neovim/issues/23291#issuecomment-1686709265 is fixed.
+                        didChangeWatchedFiles = { dynamicRegistration = false },
+                    },
+                },
+                {
+                    textDocument = {
+                        -- Enable folding.
+                        foldingRange = {
+                            dynamicRegistration = false,
+                            lineFoldingOnly = true,
+                        },
+                    },
+                }
             )
 
             local function setup(server_name)
@@ -175,23 +212,111 @@ return {
                 handlers = { setup },
             })
 
+            local md_namespace =
+                vim.api.nvim_create_namespace('dppascual/lsp_float')
+
+            ---LSP handler that adds extra inline highlights, keymaps, and window options.
+            ---Code inspired from `noice`.
+            ---@param handler fun(err: any, result: any, ctx: any, config: any): integer, integer
+            ---@return function
+            local function enhanced_float_handler(handler)
+                return function(err, result, ctx, config)
+                    local buf, win = handler(
+                        err,
+                        result,
+                        ctx,
+                        vim.tbl_deep_extend('force', config or {}, {
+                            border = CUSTOM_BORDER,
+                            max_height = math.floor(vim.o.lines * 0.5),
+                            max_width = math.floor(vim.o.columns * 0.4),
+                        })
+                    )
+
+                    if not buf or not win then
+                        return
+                    end
+
+                    -- Conceal everything.
+                    vim.wo[win].concealcursor = 'n'
+
+                    -- Extra highlights.
+                    for l, line in
+                        ipairs(vim.api.nvim_buf_get_lines(buf, 0, -1, false))
+                    do
+                        for pattern, hl_group in pairs({
+                            ['|%S-|'] = '@text.reference',
+                            ['@%S+'] = '@parameter',
+                            ['^%s*(Parameters:)'] = '@text.title',
+                            ['^%s*(Return:)'] = '@text.title',
+                            ['^%s*(See also:)'] = '@text.title',
+                            ['{%S-}'] = '@parameter',
+                        }) do
+                            local from = 1 ---@type integer?
+                            while from do
+                                local to
+                                from, to = line:find(pattern, from)
+                                if from then
+                                    vim.api.nvim_buf_set_extmark(
+                                        buf,
+                                        md_namespace,
+                                        l - 1,
+                                        from - 1,
+                                        {
+                                            end_col = to,
+                                            hl_group = hl_group,
+                                        }
+                                    )
+                                end
+                                from = to and to + 1 or nil
+                            end
+                        end
+                    end
+
+                    -- Add keymaps for opening links.
+                    if not vim.b[buf].markdown_keys then
+                        vim.keymap.set('n', 'gx', function()
+                            -- Vim help links.
+                            local url = (
+                                vim.fn.expand('<cWORD>') --[[@as string]]
+                            ):match('|(%S-)|')
+                            if url then
+                                return vim.cmd.help(url)
+                            end
+
+                            -- Markdown links.
+                            local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+                            local from, to
+                            from, to, url = vim.api
+                                .nvim_get_current_line()
+                                :find('%[.-%]%((%S-)%)')
+                            if from and col >= from and col <= to then
+                                vim.system({ 'open', url }, nil, function(res)
+                                    if res.code ~= 0 then
+                                        vim.notify(
+                                            'Failed to open URL' .. url,
+                                            vim.log.levels.ERROR
+                                        )
+                                    end
+                                end)
+                            end
+                        end, {
+                            buffer = buf,
+                            silent = true,
+                        })
+                        vim.b[buf].markdown_keys = true
+                    end
+                end
+            end
+
             -- Hover configuration
             --
             vim.lsp.handlers['textDocument/hover'] =
-                vim.lsp.with(vim.lsp.handlers.hover, {
-                    focusable = true,
-                    style = 'minimal',
-                    border = 'rounded',
-                })
+                enhanced_float_handler(vim.lsp.handlers.hover)
 
             -- Signature Help configuration
             --
             vim.lsp.handlers['textDocument/signatureHelp'] =
-                vim.lsp.with(vim.lsp.handlers.signature_help, {
-                    focusable = true,
-                    style = 'minimal',
-                    border = 'rounded',
-                })
+                enhanced_float_handler(vim.lsp.handlers.signature_help)
 
             -- Turn on lsp status information
             --
@@ -244,21 +369,6 @@ return {
             else
                 ensure_installed()
             end
-        end,
-    },
-
-    -- null-ls
-    --
-    {
-        'jose-elias-alvarez/null-ls.nvim',
-        event = { 'BufReadPre', 'BufNewFile' },
-        dependencies = { 'mason.nvim' },
-        opts = function()
-            local nls = require('null-ls')
-            return {
-                debug = false,
-                sources = { nls.builtins.formatting.prettier },
-            }
         end,
     },
 }

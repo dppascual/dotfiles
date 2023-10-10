@@ -8,7 +8,11 @@ return {
             {
                 'Saecki/crates.nvim',
                 event = { 'BufRead Cargo.toml' },
-                config = true,
+                opts = {
+                    src = {
+                        cmp = { enabled = true },
+                    },
+                },
             },
         },
         ---@param opts cmp.ConfigSchema
@@ -26,7 +30,7 @@ return {
         'nvim-treesitter/nvim-treesitter',
         opts = function(_, opts)
             if type(opts.ensure_installed) == 'table' then
-                vim.list_extend(opts.ensure_installed, { 'ron', 'rust' })
+                vim.list_extend(opts.ensure_installed, { 'ron', 'rust', 'toml' })
             end
         end,
     },
@@ -43,21 +47,9 @@ return {
                 rust_analyzer = {
                     mason = false,
                     keys = {
-                        {
-                            'K',
-                            '<cmd>RustHoverActions<cr>',
-                            desc = 'Hover Actions (Rust)',
-                        },
-                        {
-                            '<leader>cR',
-                            '<cmd>RustCodeAction<cr>',
-                            desc = 'Code Action (Rust)',
-                        },
-                        {
-                            '<leader>dr',
-                            '<cmd>RustDebuggables<cr>',
-                            desc = 'Run Debuggables (Rust)',
-                        },
+                        { 'K', '<cmd>RustHoverActions<cr>', desc = 'Hover Actions (Rust)', },
+                        { '<leader>cR', '<cmd>RustCodeAction<cr>', desc = 'Code Action (Rust)', },
+                        { '<leader>dr', '<cmd>RustDebuggables<cr>', desc = 'Run Debuggables (Rust)', },
                     },
                     cmd = {
                         'rustup',
@@ -96,15 +88,39 @@ return {
                         },
                     },
                 },
+                taplo = {
+                    keys = {
+                        {
+                            'K',
+                            function()
+                                if
+                                    vim.fn.expand('%:t') == 'Cargo.toml' and require('crates').popup_available()
+                                then
+                                    require('crates').show_popup()
+                                else
+                                    vim.lsp.buf.hover()
+                                end
+                            end,
+                            desc = 'Show Crate Documentation',
+                        },
+                    },
+                },
             },
             setup = {
                 rust_analyzer = function(_, opts)
                     require('rust-tools').setup({
                         tools = {
-                            autoSetHints = true,
-                            runnables = { use_telescope = true },
+                            on_initialized = function()
+                                vim.cmd([[
+                                  augroup RustLSP
+                                  autocmd CursorHold                      *.rs silent! lua vim.lsp.buf.document_highlight()
+                                  autocmd CursorMoved,InsertEnter         *.rs silent! lua vim.lsp.buf.clear_references()
+                                  autocmd BufEnter,CursorHold,InsertLeave *.rs silent! lua vim.lsp.codelens.refresh()
+                                  augroup END
+                                ]])
+                            end,
                             inlay_hints = {
-                                auto = false,
+                                auto = true,
                                 highlight = 'Whitespace',
                             },
                             hover_actions = {
