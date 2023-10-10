@@ -26,10 +26,10 @@ return {
             'nvim-treesitter/nvim-treesitter-textobjects', -- Additional text objects via treesitter
         },
         vscode = true,
-        keys = {
-            { '<space>', desc = 'Increment selection' },
-            { '<bs>', desc = 'Decrement selection', mode = 'x' },
-        },
+        -- keys = {
+        --     { '<space><space>', desc = 'Increment selection' },
+        --     { '<bs>', desc = 'Decrement selection', mode = 'x' },
+        -- },
         opts = {
             ---@type table - filled up by each language module
             ensure_installed = { 'lua' },
@@ -55,8 +55,8 @@ return {
             incremental_selection = {
                 enable = true,
                 keymaps = {
-                    init_selection = '<space>', -- maps in normal mode to init the node/scope selection with space
-                    node_incremental = '<space>', -- increment to the upper named parent
+                    init_selection = '<space><space>', -- maps in normal mode to init the node/scope selection with space
+                    node_incremental = '<space><space>', -- increment to the upper named parent
                     node_decremental = '<bs>', -- decrement to the previous node
                     scope_incremental = '<tab>', -- increment to the upper scope (as defined in locals.scm)
                 },
