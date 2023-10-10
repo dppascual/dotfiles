@@ -43,6 +43,7 @@ return {
                 },
             },
             signcolumn = true,
+            numhl = true,
             watch_gitdir = {
                 interval = 1000,
                 follow_files = true,
@@ -70,7 +71,7 @@ return {
 
                 -- stylua: ignore start
                 -- Navigation
-                map('n', ']h', function()
+                map('n', ']c', function()
                     if vim.wo.diff then
                         return ']c'
                     end
@@ -80,7 +81,7 @@ return {
                     return '<Ignore>'
                 end, { expr = true, desc = "Next Hunk" })
 
-                map('n', '[h', function()
+                map('n', '[c', function()
                     if vim.wo.diff then
                         return '[c'
                     end
@@ -112,6 +113,16 @@ return {
         cmd = {
             'DiffviewOpen',
             'DiffviewFileHistory',
+        },
+        opts = {
+            -- default_args = { -- Default args prepended to the arg-list for the listed commands
+            --     DiffviewOpen = { '--imply-local' },
+            -- },
+            hooks = {
+                diff_buf_read = function(_)
+                    vim.opt_local.relativenumber = false
+                end,
+            },
         },
     },
 }

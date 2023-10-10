@@ -7,6 +7,7 @@ return {
         'stevearc/oil.nvim',
         dependencies = { 'nvim-tree/nvim-web-devicons' },
         opts = {
+            default_file_explorer = true,
             win_options = {
                 concealcursor = 'nvc',
             },
@@ -41,6 +42,7 @@ return {
         dependencies = {
             'nvim-tree/nvim-web-devicons',
         },
+        cmd = 'FzfLua',
         -- stylua: ignore start
         keys = {
             -- general
@@ -67,8 +69,8 @@ return {
             { '<leader>sw', '<cmd>FzfLua grep_visual<CR>', mode = 'v', desc = 'Search current Selection (root dir)' },
 
             -- diagnostics
-            { '<leader>xd', '<cmd>FzfLua diagnostics_document<cr>', desc = '[D]ocument [D]iagnostics' },
-            { '<leader>xw', '<cmd>FzfLua diagnostics_workspace<cr>', desc = '[W]orkspace [D]iagnostics' },
+            { '<leader>sd', '<cmd>FzfLua diagnostics_document<cr>', desc = '[D]ocument [D]iagnostics' },
+            { '<leader>sD', '<cmd>FzfLua diagnostics_workspace<cr>', desc = '[W]orkspace [D]iagnostics' },
         },
         opts = function()
             local utils = require('fzf-lua').utils
@@ -99,12 +101,12 @@ return {
                 },
                 hls = {
                     normal = hl_validate('TelescopeNormal'),
-                    border = hl_validate('TelescopeBorder'),
+                    -- border = hl_validate('TelescopeBorder'),
                     title = hl_validate('TelescopeTitle'),
                     help_normal = hl_validate('TelescopeNormal'),
-                    help_border = hl_validate('TelescopeBorder'),
+                    -- help_border = hl_validate('TelescopeBorder'),
                     preview_normal = hl_validate('TelescopeNormal'),
-                    preview_border = hl_validate('TelescopeBorder'),
+                    -- preview_border = hl_validate('TelescopeBorder'),
                     preview_title = hl_validate('TelescopeTitle'),
                     -- builtin preview only
                     cursor = hl_validate('Cursor'),
@@ -120,8 +122,7 @@ return {
                     ['bg+'] = { 'bg', 'TelescopeSelection' },
                     ['hl+'] = { 'fg', 'TelescopeMatching' },
                     ['info'] = { 'fg', 'TelescopeMultiSelection' },
-                    ['border'] = { 'fg', 'TelescopeBorder' },
-                    ['gutter'] = { 'bg', 'TelescopeNormal' },
+                    -- ['border'] = { 'fg', 'TelescopeBorder' },
                     ['prompt'] = { 'fg', 'TelescopePromptPrefix' },
                     ['pointer'] = { 'fg', 'TelescopeSelectionCaret' },
                     ['marker'] = { 'fg', 'TelescopeSelectionCaret' },
@@ -166,15 +167,15 @@ return {
                 files = {
                     prompt = 'Files> ',
                     cwd_prompt = false,
-                    -- debug = true,
-                    cmd = "rg --color=never --files --sort=accessed --hidden --follow -g '!.git'",
-                    -- fzf_opts = { ["--tiebreak"] = "index" },
+                    -- cmd = "rg --color=always --files --ignore-case --sort=accessed --hidden --follow -g '!.git'",
+                    fzf_opts = { ["--tiebreak"] = "index" },
                 },
                 grep = {
-                    debug = false,
                     rg_glob = true,
-                    rg_opts = '--hidden --column --line-number --no-heading'
-                        .. " --color=always --smart-case -g '!.git' -e",
+                    glob_flag = "--iglob",
+                    glob_separator = "%s%-%-",
+                    rg_opts = "--sort-files --hidden --column --line-number --no-heading " ..
+                        "--color=always --ignore-case -g '!.git'",
                     fzf_opts = {
                         ['--history'] = vim.fn.shellescape(
                             vim.fn.stdpath('data') .. '/fzf_search_hist'
@@ -209,21 +210,23 @@ return {
                             },
                         },
                     },
+                    commits = {
+                        actions = {
+                            ['ctrl-y'] = { fn = function(selected, _)
+                                local commit_hash = selected[1]:match("[^ ]+")
+                                vim.fn.setreg([[+]], commit_hash)
+                            end,
+                                exec_silent = true,
+                            }
+                        }
+                    }
                 },
                 lsp = {
-                    finder  = {
-                        providers = {
-                            { "definitions",     prefix = utils.ansi_codes.green("def ") },
-                            { "declarations",    prefix = utils.ansi_codes.magenta("decl") },
-                            { "implementations", prefix = utils.ansi_codes.green("impl") },
-                            { "typedefs",        prefix = utils.ansi_codes.red("tdef") },
-                            { "references",      prefix = utils.ansi_codes.blue("ref ") },
-                            { "incoming_calls",  prefix = utils.ansi_codes.cyan("in  ") },
-                            { "outgoing_calls",  prefix = utils.ansi_codes.yellow("out ") },
-                        },
-                    },
                     symbols = {
-                        path_shorten = 1,
+                        fzf_opts = {
+                             ["--delimiter"] = "'[:]'",
+                            ["--with-nth"]  = "4..",
+                        },
                         symbol_icons = {
                             Namespace = ' ',
                             Method = ' ',
@@ -270,124 +273,6 @@ return {
             end)
         end,
     },
-
-    -- Fuzzy Finder
-    --
-    -- { 'nvim-telescope/telescope-fzf-native.nvim', build = 'make' },
-    -- {
-    --     'nvim-telescope/telescope.nvim',
-    --     tag = '0.1.2',
-    --     cmd = 'Telescope',
-    --     dependencies = {
-    --         'nvim-lua/plenary.nvim',
-    --         'nvim-treesitter/nvim-treesitter',
-    --         'nvim-tree/nvim-web-devicons',
-    --     },
-        -- stylua: ignore
-        -- keys = {
-        --     -- general
-        --     { '<leader>?', '<cmd>Telescope builtin<cr>', desc = '[?] Built-in' },
-        --     { '<leader>:', '<cmd>Telescope commands<cr>', desc = '[:] Commands' },
-        --
-        --     -- buffers
-        --     { '<leader>b', '<cmd>Telescope buffers<cr>', desc = '[B]uffers' },
-        --     { '<leader>sb', '<cmd>Telescope current_buffer_fuzzy_find<cr>', desc = 'Fuzzily [S]earch in current [B]uffer' },
-        --
-        --     -- files
-        --     { '<leader>ff', Util.telescope('files'), desc = '[F]ind [F]iles (root dir)' },
-        --     { '<leader>fF', "<cmd>lua require('telescope.builtin').find_files({ cwd = vim.fn.expand('%:p:h'), })<cr>", desc = '[F]ind [F]iles (cwd)' },
-        --     { '<leader>fr', '<cmd>Telescope oldfiles<cr>', desc = '[F]iles [R]ecent' },
-        --     { '<leader>sf', Util.telescope('live_grep'), desc = '[S]earch in [F]iles (root dir)' },
-        --     { '<leader>sF', Util.telescope('live_grep', { cwd = vim.fn.expand('%:p:h') }), desc = '[S]earch in [F]iles (cwd)' },
-        --
-        --     -- git
-        --     { '<leader>gc', '<cmd>Telescope git_commits<CR>', desc = '[G]it [C]ommits' },
-        --     { '<leader>gb',  '<cmd>Telescope git_branches<CR>', desc = '[G]it [B]ranches' },
-        --
-        --     -- workflow
-        --     { '<leader>m', '<cmd>Telescope harpoon marks<cr>', desc = 'Jump to Mark' },
-        --
-        --     -- search
-        --     { '<leader>sw', Util.telescope('grep_string', { word_match = '-w' }), desc = 'Search current Word (root dir)' },
-        --     { '<leader>sw', Util.telescope('grep_string'), mode = 'v', desc = 'Search current Selection (root dir)' },
-        --
-        --     -- diagnostics
-        --     { '<leader>xd', '<cmd>Telescope diagnostics bufnr=0<cr>', desc = '[D]ocument [D]iagnostics' },
-        --     { '<leader>xD', '<cmd>Telescope diagnostics<cr>', desc = '[W]orkspace [D]iagnostics' },
-        --
-        --     -- undo
-        --     { '<leader>u', '<cmd>Telescope undo<cr>', desc = '[Undo] tree' },
-        -- },
-        -- config = function(_, opts)
-        --     require('telescope').setup({
-        --         defaults = {
-        --             initial_mode = 'insert',
-        --             select_strategy = 'reset',
-        --             sorting_strategy = 'ascending',
-        --             layout_strategy = 'vertical',
-        --             layout_config = {
-        --                 flex = {
-        --                     flip_columns = 120,
-        --                 },
-        --                 horizontal = {
-        --                     prompt_position = 'top',
-        --                     width = 0.8,
-        --                     height = 0.3,
-        --                     preview_width = 0.5,
-        --                 },
-        --                 vertical = {
-        --                     prompt_position = 'top',
-        --                     width = 0.5,
-        --                     height = 0.8,
-        --                     mirror = true,
-        --                     preview_cutoff = 0,
-        --                 },
-        --             },
-        --             -- stylua: ignore
-        --             mappings = {
-        --                 n = {
-        --                     ['<c-p>'] = require('telescope.actions.layout').toggle_preview,
-        --                 },
-        --                 i = {
-        --                     ['<c-t>'] = function(...)
-        --                         return require('trouble.providers.telescope').smart_open_with_trouble(...)
-        --                     end,
-        --                     ['<c-p>'] = require('telescope.actions.layout').toggle_preview,
-        --                     ['<c-q>'] = require('telescope.actions').smart_send_to_qflist + require('telescope.actions').open_qflist,
-        --                 },
-        --             },
-        --         },
-        --         pickers = {
-        --             git_branches = {
-        --                 theme = 'dropdown',
-        --                 previewer = false,
-        --                 layout_config = {
-        --                     width = 0.5,
-        --                 },
-        --             },
-        --             commands = {
-        --                 theme = 'dropdown',
-        --                 previewer = false,
-        --                 layout_config = {
-        --                     width = 0.5,
-        --                 },
-        --             },
-        --         },
-        --         extensions = {
-        --             fzf = {
-        --                 fuzzy = true, -- false will only do exact matching
-        --                 override_generic_sorter = true, -- override the generic sorter
-        --                 override_file_sorter = true, -- override the file sorter
-        --                 case_mode = 'smart_case', -- or "ignore_case" or "respect_case"
-        --             },
-        --         },
-        --     })
-
-            -- To get fzf loaded and working with telescope, you need to call
-            -- load_extension, somewhere after setup function:
-    --         require('telescope').load_extension('fzf')
-    --     end,
-    -- },
 
     -- Harpoon
     --
@@ -499,24 +384,6 @@ return {
         end,
     },
 
-    -- Indent Highlight
-    --
-    {
-        'shellRaining/hlchunk.nvim',
-        enable = false,
-        event = { 'UIEnter' },
-        opts = {
-            chunk = {
-                exclude_filetypes = {
-                    fzf = true,
-                },
-            },
-            indent = { enable = false },
-            line_num = { enable = false },
-            blank = { enable = false },
-        },
-    },
-
     -- TODO Comments
     --
     {
@@ -550,63 +417,63 @@ return {
     -- Automatically highlights other instances of the word under your cursor.
     -- This works with LSP, Treesitter, and regexp matching to find the other
     -- instances.
-    {
-        'RRethy/vim-illuminate',
-        event = { 'BufReadPost', 'BufNewFile' },
-        opts = {
-            providers = {
-                'lsp',
-                'treesitter',
-                'regex',
-            },
-            delay = 200,
-            filetypes_denylist = {
-                'oil',
-                'fugitive',
-                'qf',
-                'TelescopePrompt',
-                'Trouble',
-                'DiffviewFiles',
-                'DiffviewFileHistory',
-            },
-            large_file_cutoff = 2000,
-            large_file_overrides = {
-                providers = {
-                    'lsp',
-                },
-            },
-        },
-        config = function(_, opts)
-            require('illuminate').configure(opts)
-
-            local function map(key, dir, buffer)
-                vim.keymap.set('n', key, function()
-                    require('illuminate')['goto_' .. dir .. '_reference'](false)
-                end, {
-                    desc = dir:sub(1, 1):upper() .. dir:sub(2) .. ' Reference',
-                    buffer = buffer,
-                })
-            end
-            local bufnr = vim.api.nvim_get_current_buf()
-
-            map(']]', 'next', bufnr)
-            map('[[', 'prev', bufnr)
-            --
-            --     -- also set it after loading ftplugins, since a lot overwrite [[ and ]]
-            --     vim.api.nvim_create_autocmd('FileType', {
-            --         pattern = require('illuminate').
-            --         callback = function()
-            --             local buffer = vim.api.nvim_get_current_buf()
-            --             map(']]', 'next', buffer)
-            --             map('[[', 'prev', buffer)
-            --         end,
-            -- })
-        end,
-        -- keys = {
-        --     { ']]', desc = 'Next Reference' },
-        --     { '[[', desc = 'Prev Reference' },
-        -- },
-    },
+    -- {
+    --     'RRethy/vim-illuminate',
+    --     event = { 'BufReadPost', 'BufNewFile' },
+    --     opts = {
+    --         providers = {
+    --             'lsp',
+    --             'treesitter',
+    --             'regex',
+    --         },
+    --         delay = 200,
+    --         filetypes_denylist = {
+    --             'oil',
+    --             'fugitive',
+    --             'qf',
+    --             'TelescopePrompt',
+    --             'Trouble',
+    --             'DiffviewFiles',
+    --             'DiffviewFileHistory',
+    --         },
+    --         large_file_cutoff = 2000,
+    --         large_file_overrides = {
+    --             providers = {
+    --                 'lsp',
+    --             },
+    --         },
+    --     },
+    --     config = function(_, opts)
+    --         require('illuminate').configure(opts)
+    --
+    --         local function map(key, dir, buffer)
+    --             vim.keymap.set('n', key, function()
+    --                 require('illuminate')['goto_' .. dir .. '_reference'](false)
+    --             end, {
+    --                 desc = dir:sub(1, 1):upper() .. dir:sub(2) .. ' Reference',
+    --                 buffer = buffer,
+    --             })
+    --         end
+    --         local bufnr = vim.api.nvim_get_current_buf()
+    --
+    --         map(']]', 'next', bufnr)
+    --         map('[[', 'prev', bufnr)
+    --         --
+    --         --     -- also set it after loading ftplugins, since a lot overwrite [[ and ]]
+    --         --     vim.api.nvim_create_autocmd('FileType', {
+    --         --         pattern = require('illuminate').
+    --         --         callback = function()
+    --         --             local buffer = vim.api.nvim_get_current_buf()
+    --         --             map(']]', 'next', buffer)
+    --         --             map('[[', 'prev', buffer)
+    --         --         end,
+    --         -- })
+    --     end,
+    --     -- keys = {
+    --     --     { ']]', desc = 'Next Reference' },
+    --     --     { '[[', desc = 'Prev Reference' },
+    --     -- },
+    -- },
 
     -- Testing framework
     --
