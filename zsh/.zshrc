@@ -26,6 +26,8 @@ export GOPROXY="https://proxy.golang.org,direct"
 export GO111MODULE=on
 export GOMODCACHE="$GOPATH/pkg/mod"
 export PATH="${GOROOT}/bin:${GOPATH}/bin:${HOME}/.cargo/bin:${PATH}"
+### Include binaries installed by mason with lower preference.
+export PATH="${PATH}:${HOME}/.local/share/nvim/mason/bin"
 
 ##################
 ###
