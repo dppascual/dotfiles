@@ -125,4 +125,19 @@ return {
             },
         },
     },
+    {
+        'rhysd/git-messenger.vim',
+        keys = {
+            {
+                '<leader>gm',
+                '<cmd>GitMessenger<cr>',
+                desc = 'Reveal a Git message under the cursor',
+            },
+        },
+        config = function()
+            vim.g.git_messenger_floating_win_opts = {
+                border = CUSTOM_BORDER,
+            }
+        end,
+    },
 }
