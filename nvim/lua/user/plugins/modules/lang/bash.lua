@@ -7,16 +7,9 @@ return {
             if type(opts.ensure_installed) == 'table' then
                 vim.list_extend(opts.ensure_installed, { 'bash' })
             end
-        end,
-    },
 
-    -- Binares required by formatters and linters
-    --
-    {
-        'mason.nvim',
-        opts = function(_, opts)
-            opts.ensure_installed = opts.ensure_installed or {}
-            vim.list_extend(opts.ensure_installed, { 'shfmt', 'shellcheck' })
+            -- Register zsh
+            vim.treesitter.language.register('bash', 'zsh')
         end,
     },
 
@@ -32,25 +25,15 @@ return {
         },
     },
 
-    -- Add linters
-    --
-    {
-        'mfussenegger/nvim-lint',
-        dependencies = { 'mason.nvim' },
-        opts = {
-            linters_by_ft = {
-                sh = { 'shellcheck' },
-            },
-        },
-    },
-
     -- Correctly setup lspconfig for bash
     --
     {
         'neovim/nvim-lspconfig',
         opts = {
             servers = {
-                bashls = {},
+                bashls = {
+                    filetypes = { 'sh', 'zsh', 'bash' },
+                },
             },
         },
     },
