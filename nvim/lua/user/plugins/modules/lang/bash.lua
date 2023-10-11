@@ -16,10 +16,7 @@ return {
         'mason.nvim',
         opts = function(_, opts)
             opts.ensure_installed = opts.ensure_installed or {}
-            vim.list_extend(
-                opts.ensure_installed,
-                { 'shfmt', 'shellcheck' }
-            )
+            vim.list_extend(opts.ensure_installed, { 'shfmt', 'shellcheck' })
         end,
     },
 
@@ -27,6 +24,7 @@ return {
     --
     {
         'stevearc/conform.nvim',
+        dependencies = { 'mason.nvim' },
         opts = {
             formatters_by_ft = {
                 sh = { 'shfmt' },
@@ -34,10 +32,11 @@ return {
         },
     },
 
-    -- Add linter
+    -- Add linters
     --
     {
         'mfussenegger/nvim-lint',
+        dependencies = { 'mason.nvim' },
         opts = {
             linters_by_ft = {
                 sh = { 'shellcheck' },

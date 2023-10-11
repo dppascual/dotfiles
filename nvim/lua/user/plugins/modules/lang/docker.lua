@@ -10,7 +10,7 @@ return {
         end,
     },
 
-    -- Add linter
+    -- Add linters
     --
     {
         'mfussenegger/nvim-lint',
