@@ -324,13 +324,19 @@ return {
             vim.o.formatexpr = "v:lua.require'conform'.formatexpr()"
         end,
         opts = {
+            ---@type table<string, conform.FormatterUnit[]>
+            formatters_by_ft = {
+                -- Use the "_" filetype to run formatters on filetypes that don't
+                -- have other formatters configured.
+                ['_'] = { 'trim_whitespace' },
+            },
             ---@type table<string,table>
             formatters = {
                 injected = { options = { ignore_errors = true } },
             },
             format_on_save = {
                 -- These options will be passed to conform.format()
-                timeout_ms = 500,
+                timeout_ms = 1000,
                 lsp_fallback = true,
             },
         },
