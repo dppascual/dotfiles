@@ -92,7 +92,7 @@ return {
                     preview = {
                         hidden = 'nohidden',
                         vertical = 'up:45%',
-                        horizontal = 'down:60%',
+                        horizontal = 'up:60%',
                         wrap = 'wrap',
                         layout = 'flex',
                         flip_columns = 120,
