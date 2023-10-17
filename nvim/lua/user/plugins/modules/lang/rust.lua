@@ -30,7 +30,10 @@ return {
         'nvim-treesitter/nvim-treesitter',
         opts = function(_, opts)
             if type(opts.ensure_installed) == 'table' then
-                vim.list_extend(opts.ensure_installed, { 'ron', 'rust', 'toml' })
+                vim.list_extend(
+                    opts.ensure_installed,
+                    { 'ron', 'rust', 'toml' }
+                )
             end
         end,
     },
@@ -47,9 +50,21 @@ return {
                 rust_analyzer = {
                     mason = false,
                     keys = {
-                        { 'K', '<cmd>RustHoverActions<cr>', desc = 'Hover Actions (Rust)', },
-                        { '<leader>cR', '<cmd>RustCodeAction<cr>', desc = 'Code Action (Rust)', },
-                        { '<leader>dr', '<cmd>RustDebuggables<cr>', desc = 'Run Debuggables (Rust)', },
+                        {
+                            'K',
+                            '<cmd>RustHoverActions<cr>',
+                            desc = 'Hover Actions (Rust)',
+                        },
+                        {
+                            '<leader>cR',
+                            '<cmd>RustCodeAction<cr>',
+                            desc = 'Code Action (Rust)',
+                        },
+                        {
+                            '<leader>dr',
+                            '<cmd>RustDebuggables<cr>',
+                            desc = 'Run Debuggables (Rust)',
+                        },
                     },
                     cmd = {
                         'rustup',
@@ -59,8 +74,6 @@ return {
                     },
                     settings = {
                         ['rust-analyzer'] = {
-                            -- See: https://github.com/simrat39/rust-tools.nvim/issues/300
-                            inlayHints = { locationLinks = false },
                             cargo = {
                                 allFeatures = true,
                                 loadOutDirsFromCheck = true,
@@ -94,7 +107,8 @@ return {
                             'K',
                             function()
                                 if
-                                    vim.fn.expand('%:t') == 'Cargo.toml' and require('crates').popup_available()
+                                    vim.fn.expand('%:t') == 'Cargo.toml'
+                                    and require('crates').popup_available()
                                 then
                                     require('crates').show_popup()
                                 else
@@ -119,10 +133,7 @@ return {
                                   augroup END
                                 ]])
                             end,
-                            inlay_hints = {
-                                auto = true,
-                                highlight = 'Whitespace',
-                            },
+                            inlay_hints = { auto = false },
                             hover_actions = {
                                 border = CUSTOM_BORDER,
                                 auto_focus = false,
