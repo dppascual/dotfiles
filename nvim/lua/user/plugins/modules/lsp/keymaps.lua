@@ -26,7 +26,23 @@ M.on_attach = function(client, bufnr)
     keymapFn('gr', ':Glance references', { desc = '[G]oto [R]eferences' })
     keymapFn( 'gi', ':Glance implementations', { desc = '[G]oto [I]mplementation' })
     keymapFn( 'gy', ':Glance type_definitions', { desc = '[G]oto [T]ype Definition' })
-    keymapFn('K', vim.lsp.buf.hover, { desc = 'Hover Documentation' })
+    if client.name == 'rust_analyzer' then
+        keymapFn('K', ':RustHoverActions', { desc = 'Hover Actions (Rust)' })
+        keymapFn('<leader>dr', ':RustDebuggables', { desc = 'Run Debuggables (Rust)' })
+    elseif client.name == 'taplo' then
+        keymapFn('K', function()
+            if
+                vim.fn.expand('%:t') == 'Cargo.toml'
+                and require('crates').popup_available()
+            then
+                require('crates').show_popup()
+            else
+                vim.lsp.buf.hover()
+            end
+        end, { desc = 'Show Crate Documentation' })
+    else
+        keymapFn('K', vim.lsp.buf.hover, { desc = 'Hover Documentation' })
+    end
     keymapFn( '<C-k>', vim.lsp.buf.signature_help, { desc = 'Signature Help', mode = { 'i', 'n' } })
     keymapFn( '<leader>ss', ':FzfLua lsp_document_symbols', { desc = '[D]ocument [S]ymbols' })
     keymapFn( '<leader>sS', ':FzfLua lsp_live_workspace_symbols', { desc = '[W]orkspace [S]ymbols' })
@@ -36,10 +52,14 @@ M.on_attach = function(client, bufnr)
     end
 
     if client.supports_method('textDocument/codeAction') then
-        keymapFn( '<leader>ca', ':CodeActionMenu', { desc = 'Code [A]ction', mode = { 'n', 'v' } })
-        keymapFn('<leader>cA', function()
-            vim.lsp.buf.code_action({context = {only = { 'source' }, diagnostics = {}}})
-        end, { desc = 'Code [A]ction', mode = { 'n', 'v' } })
+        if client.name == 'rust_analyzer' then
+            keymapFn('<leader>ca', ':RustCodeAction', { desc = 'Code Action (Rust)' })
+        else
+            keymapFn( '<leader>ca', ':CodeActionMenu', { desc = 'Code [A]ction', mode = { 'n', 'v' } })
+            keymapFn('<leader>cA', function()
+                vim.lsp.buf.code_action({context = {only = { 'source' }, diagnostics = {}}})
+            end, { desc = 'Code [A]ction', mode = { 'n', 'v' } })
+        end
     end
 
     -- Lesser used LSP functionality

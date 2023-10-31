@@ -12,6 +12,9 @@ return {
                     src = {
                         cmp = { enabled = true },
                     },
+                    popup = {
+                        border = CUSTOM_BORDER,
+                    },
                 },
             },
         },
@@ -48,30 +51,23 @@ return {
         opts = {
             servers = {
                 rust_analyzer = {
-                    mason = false,
-                    keys = {
-                        {
-                            'K',
-                            '<cmd>RustHoverActions<cr>',
-                            desc = 'Hover Actions (Rust)',
-                        },
-                        {
-                            '<leader>cR',
-                            '<cmd>RustCodeAction<cr>',
-                            desc = 'Code Action (Rust)',
-                        },
-                        {
-                            '<leader>dr',
-                            '<cmd>RustDebuggables<cr>',
-                            desc = 'Run Debuggables (Rust)',
-                        },
-                    },
-                    cmd = {
-                        'rustup',
-                        'run',
-                        'stable',
-                        'rust-analyzer',
-                    },
+                    -- keys = {
+                    --     {
+                    --         'K',
+                    --         '<cmd>RustHoverActions<cr>',
+                    --         desc = 'Hover Actions (Rust)',
+                    --     },
+                    --     {
+                    --         '<leader>ca',
+                    --         '<cmd>RustCodeAction<cr>',
+                    --         desc = 'Code Action (Rust)',
+                    --     },
+                    --     {
+                    --         '<leader>dr',
+                    --         '<cmd>RustDebuggables<cr>',
+                    --         desc = 'Run Debuggables (Rust)',
+                    --     },
+                    -- },
                     settings = {
                         ['rust-analyzer'] = {
                             cargo = {
@@ -101,24 +97,24 @@ return {
                         },
                     },
                 },
-                taplo = {
-                    keys = {
-                        {
-                            'K',
-                            function()
-                                if
-                                    vim.fn.expand('%:t') == 'Cargo.toml'
-                                    and require('crates').popup_available()
-                                then
-                                    require('crates').show_popup()
-                                else
-                                    vim.lsp.buf.hover()
-                                end
-                            end,
-                            desc = 'Show Crate Documentation',
-                        },
-                    },
-                },
+                -- taplo = {
+                --     keys = {
+                --         {
+                --             'K',
+                --             function()
+                --                 if
+                --                     vim.fn.expand('%:t') == 'Cargo.toml'
+                --                     and require('crates').popup_available()
+                --                 then
+                --                     require('crates').show_popup()
+                --                 else
+                --                     vim.lsp.buf.hover()
+                --                 end
+                --             end,
+                --             desc = 'Show Crate Documentation',
+                --         },
+                --     },
+                -- },
             },
             setup = {
                 rust_analyzer = function(_, opts)
