@@ -15,12 +15,12 @@ shift + alt - k : yabai -m window --swap north
 shift + alt - l : yabai -m window --swap east
 
 # Focus space
-alt - 1 : yabai -m space --focus 1
-alt - 2 : yabai -m space --focus 2
-alt - 3 : yabai -m space --focus 3
-alt - 4 : yabai -m space --focus 4
-alt - 5 : yabai -m space --focus 5
-alt - 6 : yabai -m space --focus 6
+alt - 1 : yabai -m query --spaces --space 1 | fx .windows[0] | xargs yabai -m window --focus
+alt - 2 : yabai -m query --spaces --space 2 | fx .windows[0] | xargs yabai -m window --focus
+alt - 3 : yabai -m query --spaces --space 3 | fx .windows[0] | xargs yabai -m window --focus
+alt - 4 : yabai -m query --spaces --space 4 | fx .windows[0] | xargs yabai -m window --focus
+alt - 5 : yabai -m query --spaces --space 5 | fx .windows[0] | xargs yabai -m window --focus
+alt - 6 : yabai -m query --spaces --space 6 | fx .windows[0] | xargs yabai -m window --focus
 alt - 7 : yabai -m space --focus 7
 alt - 8 : yabai -m space --focus 8
 alt - 9 : yabai -m space --focus 9
