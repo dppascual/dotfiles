@@ -102,7 +102,7 @@ function M.config()
             error = ' ',
             warn = ' ',
             info = ' ',
-            hint = ' ',
+            hint = '󰌵 ',
         },
     })
 
@@ -155,7 +155,7 @@ function M.config()
 
     ins_right({
         'diff',
-        symbols = { added = ' ', modified = '柳', removed = ' ' },
+        symbols = { added = ' ', modified = ' ', removed = ' ' },
         cond = conditions.hide_in_width,
     })
 
