@@ -24,7 +24,7 @@ return {
     --
     {
         'hrsh7th/nvim-cmp',
-        commit = '6c84bc75c64f778e9f1dcb798ed41c7fcb93b639',
+        -- commit = '6c84bc75c64f778e9f1dcb798ed41c7fcb93b639',
         event = { 'BufReadPre', 'BufNewFile' },
         dependencies = {
             'hrsh7th/cmp-nvim-lsp',
@@ -35,50 +35,7 @@ return {
             'saadparwaiz1/cmp_luasnip',
         },
         opts = function()
-            local kind_icons = {
-                Namespace = ' ',
-                Text = ' ',
-                Method = ' ',
-                Function = ' ',
-                Constructor = ' ',
-                Field = ' ',
-                Variable = ' ',
-                Class = ' ',
-                Interface = ' ',
-                Module = ' ',
-                Property = ' ',
-                Unit = ' ',
-                Value = ' ',
-                Enum = ' ',
-                Keyword = ' ',
-                Snippet = ' ',
-                Color = ' ',
-                File = ' ',
-                Reference = ' ',
-                Folder = ' ',
-                EnumMember = ' ',
-                Constant = ' ',
-                Struct = ' ',
-                Event = ' ',
-                Operator = ' ',
-                TypeParameter = ' ',
-                Table = '',
-                Object = ' ',
-                Tag = '',
-                Array = '[]',
-                Boolean = ' ',
-                Number = ' ',
-                Null = 'ﳠ',
-                String = ' ',
-                Calendar = '',
-                Watch = ' ',
-                Package = '',
-                Copilot = ' ',
-                Codeium = ' ',
-            }
-
             local cmp = require('cmp')
-            local defaults = require('cmp.config.default')()
             local luasnip = require('luasnip')
 
             -- select_item detects the order in which elements are shown
@@ -130,10 +87,6 @@ return {
                     -- keyword_length = 2,
                 },
 
-                matching = {
-                    disallow_partial_fuzzy_matching = false,
-                },
-
                 preselect = cmp.PreselectMode.None,
 
                 view = {
@@ -164,7 +117,7 @@ return {
                     format = function(entry, item)
                         item.kind = string.format(
                             '%s %s',
-                            kind_icons[item.kind],
+                            require('user.config.icons').symbol_kinds[item.kind],
                             item.kind
                         )
                         item.menu = ({
@@ -208,7 +161,18 @@ return {
                     end),
                 }),
 
-                sorting = defaults.sorting,
+                sorting = {
+                    comparators = {
+                        cmp.config.compare.offset,
+                        cmp.config.compare.exact,
+                        cmp.config.compare.score,
+                        cmp.config.compare.recently_used,
+                        -- cmp.config.compare.locality,
+                        cmp.config.compare.sort_text,
+                        cmp.config.compare.length,
+                        -- cmp.config.compare.order,
+                    },
+                },
             }
         end,
         config = function(_, opts)
