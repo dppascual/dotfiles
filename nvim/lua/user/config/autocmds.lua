@@ -3,15 +3,15 @@ local editor_group =
 
 -- [[ Highlight on yank ]]
 -- See `:help vim.highlight.on_yank()`
--- vim.api.nvim_create_autocmd('TextYankPost', {
---   callback = function()
---     vim.highlight.on_yank({
---       timeout = 350,
---     })
---   end,
---   group = editor_group,
---   pattern = '*',
--- })
+vim.api.nvim_create_autocmd('TextYankPost', {
+    callback = function()
+        vim.highlight.on_yank({
+            timeout = 500,
+        })
+    end,
+    group = editor_group,
+    pattern = '*',
+})
 
 -- [[ Show cursor line only in active window ]]
 --
