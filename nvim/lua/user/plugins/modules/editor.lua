@@ -50,7 +50,7 @@ return {
             { '<leader>:', '<cmd>FzfLua commands<cr>', desc = '[:] Commands' },
 
             -- buffers
-            { '<leader>b', '<cmd>FzfLua buffers<cr>', desc = '[B]uffers' },
+            { '<leader>bb', '<cmd>FzfLua buffers<cr>', desc = '[B]uffers' },
             { '<leader>sb', '<cmd>FzfLua lgrep_curbuf<cr>', desc = 'Fuzzily [S]earch in current [B]uffer' },
 
             -- files
@@ -385,49 +385,6 @@ return {
         },
     },
 
-    -- Status Column
-    --
-    {
-        'luukvbaal/statuscol.nvim',
-        config = function()
-            local builtin = require('statuscol.builtin')
-            require('statuscol').setup({
-                relculright = false,
-                segments = {
-                    {
-                        sign = {
-                            name = { 'Diagnostic' },
-                            maxwidth = 2,
-                            colwidth = 2,
-                            auto = true,
-                        },
-                        click = 'v:lua.ScSa',
-                    },
-                    {
-                        sign = {
-                            namespace = { '.*' },
-                            maxwidth = 1,
-                            colwidth = 2,
-                            auto = true,
-                        },
-                    },
-                    { text = { builtin.lnumfunc, ' ' }, click = 'v:lua.ScLa' },
-                    {
-                        sign = {
-                            name = { '.*' },
-                            maxwidth = 2,
-                            colwidth = 1,
-                            auto = true,
-                            wrap = true,
-                        },
-                        click = 'v:lua.ScSa',
-                    },
-                    { text = { builtin.foldfunc, ' ' }, click = 'v:lua.ScFa' },
-                },
-            })
-        end,
-    },
-
     -- TODO Comments
     --
     {
@@ -444,80 +401,6 @@ return {
             { "<leader>sT", "<cmd>TodoTrouble keywords=TODO,FIX,FIXME<cr>", desc = "Todo/Fix/Fixme" },
         },
     },
-
-    -- Better quickfix window
-    --
-    {
-        'kevinhwang91/nvim-bqf',
-        ft = 'qf',
-        opts = {
-            preview = {
-                winblend = 0,
-            },
-        },
-        dependencies = { 'nvim-treesitter/nvim-treesitter' },
-    },
-
-    -- Automatically highlights other instances of the word under your cursor.
-    -- This works with LSP, Treesitter, and regexp matching to find the other
-    -- instances.
-    -- {
-    --     'RRethy/vim-illuminate',
-    --     event = { 'BufReadPost', 'BufNewFile' },
-    --     opts = {
-    --         providers = {
-    --             'lsp',
-    --             'treesitter',
-    --             'regex',
-    --         },
-    --         delay = 200,
-    --         filetypes_denylist = {
-    --             'oil',
-    --             'fugitive',
-    --             'qf',
-    --             'TelescopePrompt',
-    --             'Trouble',
-    --             'DiffviewFiles',
-    --             'DiffviewFileHistory',
-    --         },
-    --         large_file_cutoff = 2000,
-    --         large_file_overrides = {
-    --             providers = {
-    --                 'lsp',
-    --             },
-    --         },
-    --     },
-    --     config = function(_, opts)
-    --         require('illuminate').configure(opts)
-    --
-    --         local function map(key, dir, buffer)
-    --             vim.keymap.set('n', key, function()
-    --                 require('illuminate')['goto_' .. dir .. '_reference'](false)
-    --             end, {
-    --                 desc = dir:sub(1, 1):upper() .. dir:sub(2) .. ' Reference',
-    --                 buffer = buffer,
-    --             })
-    --         end
-    --         local bufnr = vim.api.nvim_get_current_buf()
-    --
-    --         map(']]', 'next', bufnr)
-    --         map('[[', 'prev', bufnr)
-    --         --
-    --         --     -- also set it after loading ftplugins, since a lot overwrite [[ and ]]
-    --         --     vim.api.nvim_create_autocmd('FileType', {
-    --         --         pattern = require('illuminate').
-    --         --         callback = function()
-    --         --             local buffer = vim.api.nvim_get_current_buf()
-    --         --             map(']]', 'next', buffer)
-    --         --             map('[[', 'prev', buffer)
-    --         --         end,
-    --         -- })
-    --     end,
-    --     -- keys = {
-    --     --     { ']]', desc = 'Next Reference' },
-    --     --     { '[[', desc = 'Prev Reference' },
-    --     -- },
-    -- },
 
     -- Testing framework
     --
