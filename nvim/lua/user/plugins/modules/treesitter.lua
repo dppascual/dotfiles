@@ -9,7 +9,7 @@ return {
     {
         'nvim-treesitter/nvim-treesitter-context',
         event = 'BufReadPre',
-        opts = {},
+        opts = { mode = 'cursor', max_lines = 3 },
     },
 
     -- Highlight, edit, and navigate code
