@@ -13,7 +13,7 @@ source ~/.zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 ############
 export ZSH_CACHE_DIR="${HOME}/.local/share/oh-my-zsh"
 export CLICOLOR=1
-export EDITOR="/usr/local/bin/nvim"
+export EDITOR="/opt/homebrew/bin/nvim"
 export TERM=xterm-256color
 export LESS="-R"
 export LC_ALL=en_US.UTF-8
@@ -118,14 +118,14 @@ eval "$(starship init zsh)"
 ### Aliases
 ###
 ###########
-alias vim=/usr/local/bin/nvim
-alias vi=/usr/local/bin/nvim
-alias cat=/usr/local/bin/bat
+alias nv=/opt/homebrew/bin/nvim
+alias vim=/opt/homebrew/bin/nvim
+alias cat=/opt/homebrew/bin/bat
 alias ofv='sudo openfortivpn -c /opt/vpnaas/config'
 alias pf='fzf --preview='\''/usr/local/bin/bat --color=always --style=numbers {}'\'' --bind shift-up:preview-page-up,shift-down:preview-page-down'
-alias ls=/usr/local/bin/exa
+alias ls=/opt/homebrew/bin/exa
 
-gd() { /usr/local/bin/nvim -c "DiffviewOpen $@"; }
+gd() { /opt/homebrew/bin/nvim -c "DiffviewOpen $@"; }
 
 #####
 #
@@ -136,9 +136,6 @@ gd() { /usr/local/bin/nvim -c "DiffviewOpen $@"; }
 ### Load local completions
 fpath=(~/.zsh $fpath)
 
-### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
-export PATH="/Users/dppascual/.rd/bin:$PATH"
-### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
 autoload -U +X bashcompinit && bashcompinit
 ### MinIO autocomplete
 #complete -o nospace -C /usr/local/bin/mc mc
