@@ -107,6 +107,14 @@ return {
     },
     {
         'tpope/vim-fugitive',
+        event = 'VeryLazy',
+        keys = {
+            {
+                '<leader>gs',
+                '<cmd>vertical Git<cr>',
+                desc = 'Git Status',
+            },
+        },
     },
     {
         'sindrets/diffview.nvim',
