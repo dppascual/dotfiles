@@ -106,6 +106,18 @@ function M.config()
         },
     })
 
+    ins_left({
+        'macro-recording',
+        fmt = function()
+            local recording_register = vim.fn.reg_recording()
+            if recording_register == '' then
+                return ''
+            else
+                return 'Recording @' .. recording_register
+            end
+        end,
+    })
+
     -- Add components to right sections
     ins_right({
         -- Lsp server name .
