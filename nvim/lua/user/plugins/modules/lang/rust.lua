@@ -41,6 +41,18 @@ return {
         end,
     },
 
+    -- Formatting
+    --
+    {
+        'stevearc/conform.nvim',
+        opts = {
+            formatters_by_ft = {
+                -- Deprecated to be installed by mason (intalled with rustup)
+                rust = { 'rustfmt' },
+            },
+        },
+    },
+
     -- Correctly setup lspconfig for rust
     --
     {
