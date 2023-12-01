@@ -32,6 +32,16 @@ map(
     { expr = true, silent = true }
 )
 
+-- Emacs motion on insert mode.
+--
+map(
+    'i',
+    '<C-a>',
+    '<esc>I',
+    { desc = 'Move cursor to the beginning of the line' }
+)
+map('i', '<C-e>', '<esc>A', { desc = 'Move cursor to the end of the line' })
+
 -- Move to window using the <ctrl> hjkl keys
 -- map("n", "<C-h>", "<C-w>h", { desc = "Go to left window", remap = true })
 -- map("n", "<C-j>", "<C-w>j", { desc = "Go to lower window", remap = true })
@@ -61,10 +71,6 @@ map('i', '<A-j>', '<esc><cmd>m .+1<cr>==gi', { desc = 'Move down' })
 map('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move up' })
 map('v', '<A-j>', ":m '>+1<cr>gv=gv", { desc = 'Move down' })
 map('v', '<A-k>', ":m '<-2<cr>gv=gv", { desc = 'Move up' })
-
--- Navigate buffers
-map('n', '[b', ':bprevious<CR>', { desc = 'Previous buffer' })
-map('n', ']b', ':bnext<CR>', { desc = 'Next buffer' })
 
 -- https://github.com/mhinz/vim-galore#saner-behavior-of-n-and-n
 map(
