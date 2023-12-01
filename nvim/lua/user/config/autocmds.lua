@@ -35,6 +35,28 @@ vim.api.nvim_create_autocmd({ 'InsertEnter', 'WinLeave' }, {
     end,
 })
 
+-- [[ Show color column only in active window ]]
+--
+vim.api.nvim_create_autocmd({ 'WinEnter' }, {
+    callback = function()
+        local ok, cl = pcall(vim.api.nvim_win_get_var, 0, 'auto-colorcolumn')
+        if ok and cl then
+            vim.wo.colorcolumn = cl
+            vim.api.nvim_win_del_var(0, 'auto-colorcolumn')
+        end
+    end,
+})
+
+vim.api.nvim_create_autocmd({ 'WinLeave' }, {
+    callback = function()
+        local cl = vim.wo.colorcolumn
+        if cl then
+            vim.api.nvim_win_set_var(0, 'auto-colorcolumn', cl)
+            vim.wo.colorcolumn = '0'
+        end
+    end,
+})
+
 -- [[ Create missing folders on save ]]
 --
 vim.api.nvim_create_autocmd('BufWritePre', {
