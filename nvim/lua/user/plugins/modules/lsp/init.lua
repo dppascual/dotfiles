@@ -43,18 +43,7 @@ return {
                     },
                 },
             },
-            {
-                'j-hui/fidget.nvim',
-                tag = 'legacy',
-                opts = {
-                    window = {
-                        blend = 0,
-                    },
-                    text = {
-                        spinner = 'dots',
-                    },
-                },
-            },
+            { 'j-hui/fidget.nvim', opts = {} },
             {
                 'kosayoda/nvim-lightbulb',
                 opts = {
