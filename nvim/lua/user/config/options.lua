@@ -7,6 +7,7 @@ vim.g.maplocalleader = ' '
 --
 -- vim.opt.hidden = true
 vim.opt.showmatch = true -- Highlight matching parenthesis
+vim.opt.showcmd = false
 vim.opt.matchtime = 3 -- Tenths of a second to show the matching paren
 vim.opt.splitright = true -- Split windows right to the current windows
 vim.opt.splitbelow = true -- Split windows below to the current windows
@@ -20,7 +21,6 @@ vim.opt.ignorecase = true -- Search case insensitive...
 vim.opt.smartcase = true -- ... but not it begins with upper case
 vim.opt.completeopt = 'menuone,noinsert,noselect' -- Autocomplete options
 vim.opt.updatetime = 100 -- 100ms of no cursor movement to trigger CursorHold
-
 -- [[ UI-related options ]]
 --
 vim.opt.number = true -- Show line numbers
