@@ -149,38 +149,81 @@ return {
                     buffer = {
                         bg = bg,
                     },
+                    buffer_visible = {
+                        bg = bg,
+                    },
                     diagnostic = {
+                        bg = bg,
+                    },
+                    diagnostic_visible = {
                         bg = bg,
                     },
                     hint = {
                         bg = bg,
                     },
+                    hint_visible = {
+                        bg = bg,
+                    },
                     hint_diagnostic = {
+                        bg = bg,
+                    },
+                    hint_diagnostic_visible = {
                         bg = bg,
                     },
                     warning = {
                         bg = bg,
                     },
+                    warning_visible = {
+                        bg = bg,
+                    },
                     warning_diagnostic = {
+                        bg = bg,
+                    },
+                    warning_diagnostic_visible = {
                         bg = bg,
                     },
                     error = {
                         bg = bg,
                     },
+                    error_visible = {
+                        bg = bg,
+                    },
                     error_diagnostic = {
+                        bg = bg,
+                    },
+                    error_diagnostic_visible = {
                         bg = bg,
                     },
                     info = {
                         bg = bg,
                     },
+                    info_visible = {
+                        bg = bg,
+                    },
                     info_diagnostic = {
+                        bg = bg,
+                    },
+                    info_diagnostic_visible = {
                         bg = bg,
                     },
                     modified = {
                         bg = bg,
                     },
-                    separator = {
-                        fg = '#191919',
+                    modified_visible = {
+                        bg = bg,
+                    },
+                    -- separator = {
+                    --     fg = '#191919',
+                    -- },
+                    -- separator_visible = {
+                    --     fg = '#191919',
+                    -- },
+                    -- separator_selected = {
+                    --     fg = '#191919',
+                    --     bg = '#98bb6c',
+                    -- },
+                    indicator_visible = {
+                        fg = bg,
                         bg = bg,
                     },
                     indicator_selected = {
@@ -196,7 +239,7 @@ return {
                     show_close_icon = false,
                     show_buffer_close_icons = false,
                     truncate_names = false,
-                    separator_style = 'thin',
+                    separator_style = { '', '' },
                     indicator = { style = 'icon' },
                     close_command = function(bufnr)
                         require('mini.bufremove').delete(bufnr, false)
@@ -211,6 +254,33 @@ return {
                             .. (diag.warning and icons.WARN or '')
                         return vim.trim(indicator)
                     end,
+                    offsets = {
+                        {
+                            text = 'EXPLORER',
+                            filetype = 'neo-tree',
+                            highlight = 'PanelHeading',
+                            text_align = 'left',
+                            separator = true,
+                        },
+                        {
+                            text = 'UNDOTREE',
+                            filetype = 'undotree',
+                            highlight = 'PanelHeading',
+                            separator = true,
+                        },
+                        {
+                            text = '󰆼 DATABASE VIEWER',
+                            filetype = 'dbui',
+                            highlight = 'PanelHeading',
+                            separator = true,
+                        },
+                        {
+                            text = ' DIFF VIEW',
+                            filetype = 'DiffviewFiles',
+                            highlight = 'PanelHeading',
+                            separator = true,
+                        },
+                    },
                 },
             }
         end,

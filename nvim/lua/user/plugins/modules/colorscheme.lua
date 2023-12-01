@@ -36,8 +36,11 @@ return {
             require('kanagawa').setup({
                 compile = true,
                 commentStyle = { italic = true },
-                transparent = true,
+                transparent = false,
                 colors = {
+                    palette = {
+                        sumiInk3 = '#191919',
+                    },
                     theme = {
                         all = {
                             ui = {

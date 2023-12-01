@@ -12,8 +12,6 @@ return {
                 concealcursor = 'nvc',
             },
             keymaps = {
-                ['l'] = 'actions.select',
-                ['h'] = 'actions.parent',
                 ['q'] = 'actions.close',
             },
         },
@@ -223,10 +221,6 @@ return {
                 },
                 lsp = {
                     symbols = {
-                        fzf_opts = {
-                             ["--delimiter"] = "'[:]'",
-                            ["--with-nth"]  = "4..",
-                        },
                         symbol_icons = {
                             Namespace = ' ',
                             Method = ' ',
@@ -311,8 +305,6 @@ return {
         -- stylua: ignore
         keys = {
             { "s", mode = { "n", "x", "o" }, function() require("flash").jump() end, desc = "Flash" },
-            { "S", mode = { "n", "o", "x" }, function() require("flash").treesitter() end, desc = "Flash Treesitter" },
-            { "r", mode = "o", function() require("flash").remote() end, desc = "Remote Flash" },
             { "R", mode = { "o", "x" }, function() require("flash").treesitter_search() end, desc = "Treesitter Search" },
             { "<c-s>", mode = { "c" }, function() require("flash").toggle() end, desc = "Toggle Flash Search" },
         },
